@@ -5,7 +5,7 @@ x86 Homebrew'd Microkernel
 Starting a project like this I never imagined it would end up on Github, let alone being actually used. It is merely a hobby project that I started for research purposes. Given that, and my *fairly* limited imagination, **Kernel** was born.
 
 ## Cool, what does it do?
-Kernel is only targetting x86 (i386+) computers and as of now it supports Multiboot (GRUB will *probaly* load it), Paging, Physical and Virtual Memory Managers, Interrupts, Exception Handling, PIC, a simple Keyboard driver and a Text Mode VGA driver. Application loading will come in the next updates.
+Kernel is only targetting x86 (i386+) computers and as of now it supports Multiboot (GRUB will *probably* load it), Paging, Physical and Virtual Memory Managers, Interrupts, Exception Handling, PIC, a simple Keyboard driver and a Text Mode VGA driver. Application loading will come in the next updates.
 
 ## Nice! How do I compile?
 Compiling and correctly linking the kernel requires setting up a cross-compiler and toolchain (GCC and Binutils) for your system. Kernel will **not** compile correctly under your platform specific toolchain **even** if you are running x86. You can try passing flags to GCC to get it to compile in freestanding mode without linking to your OS's libraries but you are on your own. Consider yourself warned!
