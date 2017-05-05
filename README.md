@@ -1,6 +1,8 @@
 # Kernel
 x86 Homebrew'd Microkernel 
 
+[[Kernel/kernel_panic.png]]
+
 ## Why 'Kernel'
 Starting a project like this I never imagined it would end up on Github, let alone being actually used. It is merely a hobby project that I started for research purposes. Given that, and my *fairly* limited imagination, **Kernel** was born.
 
