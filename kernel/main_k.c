@@ -10,7 +10,7 @@
 #include "pmm.h"
 #include "vmm.h"
 
-//#include "debug.h"
+#include "debug.h"
 
 extern int end;
 
