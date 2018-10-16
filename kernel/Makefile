@@ -16,6 +16,9 @@ clean:
 run:
 	./run.sh
 
+debug:
+	./debug.sh
+
 link:
 	$(LD) $(LDFLAGS) -o kernel $(SRCS)
 
