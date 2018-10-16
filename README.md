@@ -1,5 +1,5 @@
 # Kernel
-x86 Homebrew'd Microkernel 
+x86 Homebrew'd Microkernel
 
 ![alt Kernel Panic](https://github.com/naliferopoulos/Kernel/blob/master/kernel_panic.png/)
 
@@ -20,4 +20,8 @@ You can test it under QEMU, or you can set up a partition with GRUB (or even LIL
 ## It crashed! :(
 This will probably happen more often than not. Send me a screenshot of the panic screen and I might be able to fix it!
 
-### *Kernel* is made with <3 and GCC. Special thanks to the patient and helpful community of the OSDev Forums, James Molloy, BrokenThorn Entertainment and Bran M. for their excellent OS Development material. 
+Wait, are you still reading? If so, you may also be crazy enough to try and debug Kernel in order to identify and/or patch the problem. *make debug* right away, to set up remote debugging with GDB & QEMU, then type *file kernel* to pass symbols to GDB and *target remote locahost:1234* to make it attach to QEMU. Then you can debug Kernel like any other binary (with a little bit of bonus SEGFAULT). Oh, also, you can use QEMU's monitor which is attached to stdin/stdout when *make run* to identify bugs on low-level, arch specific components.
+
+Go nuts :)
+
+### *Kernel* is made with <3 and GCC. Special thanks to the patient and helpful community of the OSDev Forums, James Molloy, BrokenThorn Entertainment and Bran M. for their excellent OS Development material.
