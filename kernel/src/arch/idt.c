@@ -1,5 +1,5 @@
 #include <arch/idt.h>
-#include <kernel/kernel.h>
+#include <libk/stdlib.h>
 
 /* Declare an IDT of 256 entries. Although we will only use the
 *  first 32 entries in this tutorial, the rest exists as a bit

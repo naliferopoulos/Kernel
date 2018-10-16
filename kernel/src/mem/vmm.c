@@ -1,6 +1,6 @@
 #include <mem/vmm.h>
 #include <mem/pmm.h>
-#include <kernel/kernel.h>
+#include <libk/stdlib.h>
 
 // Page table represents 4mb address space
 #define PTABLE_ADDR_SPACE_SIZE 0x400000

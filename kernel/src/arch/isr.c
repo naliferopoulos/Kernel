@@ -1,6 +1,6 @@
 #include <arch/isr.h>
 #include <arch/idt.h>
-#include <kernel/kernel.h>
+#include <libk/stdlib.h>
 
 
 /* These are function prototypes for all of the exception

@@ -1,5 +1,5 @@
 #include <mem/pmm.h>
-#include <kernel/kernel.h>
+#include <libk/stdlib.h>
 
 // 8 blocks per byte
 #define BLOCKS_PER_BYTE 8

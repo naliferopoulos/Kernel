@@ -1,9 +1,8 @@
-#include <kernel/kernel.h>
+#include <libk/stdlib.h>
 #include <dev/vga.h>
 
 void abort()
 {
-	monitor_write("Still up...\n");
    	while(1)
    	{
    	}
@@ -102,7 +101,7 @@ void kpanic(char* err, struct regs* r)
 
 void* kmemset(void *b, int c, int len)
 {
-  int           i;
+  int i;
   unsigned char *p = b;
   i = 0;
   while(len > 0)

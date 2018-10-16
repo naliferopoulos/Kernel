@@ -1,4 +1,4 @@
-#include <kernel/kernel.h>
+#include <libk/stdlib.h>
 #include <dev/vga.h>
 #include <arch/gdt.h>
 #include <arch/idt.h>
@@ -6,7 +6,7 @@
 #include <arch/irq.h>
 #include <dev/timer.h>
 #include <dev/keyboard.h>
-#include <kernel/multiboot.h>
+#include <boot/multiboot.h>
 #include <mem/pmm.h>
 #include <mem/vmm.h>
 

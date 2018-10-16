@@ -1,8 +1,9 @@
-SRCS=	src/boot/boot.o \
+SRCS=	\
+  src/boot/boot.o \
 	src/kernel/main_k.o \
 	src/arch/common.o \
 	src/dev/vga.o \
-	src/kernel/kernel.o \
+	src/libk/stdlib.o \
 	src/arch/gdt.o \
 	src/arch/gdt_setup.o \
 	src/arch/idt.o \
@@ -30,7 +31,7 @@ CC=/opt/cross/bin/i386-elf-gcc
 all: $(SRCS) link
 
 clean:
-	-rm src/arch/*.o src/mem/*.o src/kernel/*.o src/dev/*.o src/boot/*.o  kernel
+	-rm src/arch/*.o src/mem/*.o src/kernel/*.o src/libk/*.o src/dev/*.o src/boot/*.o  kernel
 
 run:
 	./run.sh
