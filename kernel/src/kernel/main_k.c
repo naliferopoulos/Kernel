@@ -1,16 +1,16 @@
-#include "kernel.h"
-#include "vga.h"
-#include "gdt.h"
-#include "idt.h"
-#include "isr.h"
-#include "irq.h"
-#include "timer.h"
-#include "keyboard.h"
-#include "multiboot.h"
-#include "pmm.h"
-#include "vmm.h"
+#include <kernel/kernel.h>
+#include <dev/vga.h>
+#include <arch/gdt.h>
+#include <arch/idt.h>
+#include <arch/isr.h>
+#include <arch/irq.h>
+#include <dev/timer.h>
+#include <dev/keyboard.h>
+#include <kernel/multiboot.h>
+#include <mem/pmm.h>
+#include <mem/vmm.h>
 
-#include "debug.h"
+#include <kernel/debug.h>
 
 extern int end;
 
@@ -63,7 +63,7 @@ int main_k(struct multiboot_info* mboot)
 	monitor_write("Memory Map Address: ");
 	monitor_write_hex(mboot->mmap_addr);
 	monitor_write("\n");
-	
+
 	monitor_write("Memory Map Length: ");
 	monitor_write_hex(mboot->mmap_length);
 	monitor_write("\n");
@@ -77,14 +77,14 @@ int main_k(struct multiboot_info* mboot)
 	monitor_write("\n");
 	#endif
 
-	pmmngr_init (memSize, &end + 1);	
+	pmmngr_init (memSize, &end + 1);
 
 	multiboot_memory_map_t* mmap = mboot->mmap_addr;
-	while(mmap < mboot->mmap_addr + mboot->mmap_length) 
+	while(mmap < mboot->mmap_addr + mboot->mmap_length)
 	{
 		#ifdef DEBUG_BIOS_MMAP
 		monitor_write("Memory Area\n");
-		
+
 		monitor_write("Start:");
 		monitor_write_hex(mmap->addr);
 		monitor_write(" ");
@@ -109,7 +109,7 @@ int main_k(struct multiboot_info* mboot)
 	// Mark kernel as used!
 	pmmngr_deinit_region (0x100000, &end - 0x100000);
 
-	u32int_t total_blocks = pmmngr_get_block_count();  
+	u32int_t total_blocks = pmmngr_get_block_count();
 	u32int_t used_blocks = pmmngr_get_use_block_count();
 	u32int_t free_blocks = pmmngr_get_free_block_count();
 
@@ -131,7 +131,7 @@ int main_k(struct multiboot_info* mboot)
 
 	/*
 	monitor_write("\n");
-	
+
 	monitor_write("Allocating an unsigned int.\n");
 	monitor_write("Address: ");
 	u32int_t* p = (u32int_t*)pmmngr_alloc_block ();
@@ -145,12 +145,12 @@ int main_k(struct multiboot_info* mboot)
 	u32int_t* p2 = (u32int_t*)pmmngr_alloc_block ();
 	monitor_write_hex(&p2);
 	monitor_write("\n");
-	
+
 	monitor_write("\n");
 
 	monitor_write("Assigning value '2' to the first one.\n");
 	*p = 2;
-	
+
 	monitor_write("\n");
 
 	monitor_write("Assigning value '4' to the first one.\n");
@@ -179,12 +179,12 @@ int main_k(struct multiboot_info* mboot)
 
 	#ifdef DEBUG_PMM
 	monitor_write("Virtual Memory works too!\n");
-	
+
 	monitor_write("main_k() address:");
 	monitor_write_hex(main_k);
 	monitor_write("\n");
-	
-	
+
+
 
 	#endif
 

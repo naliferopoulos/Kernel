@@ -1,7 +1,26 @@
-SRCS=boot.o main_k.o common.o vga.o kernel.o gdt.o gdt_setup.o idt.o idt_setup.o isr.o isr_setup.o irq.o irq_setup.o timer.o keyboard.o pmm.o paging_setup.o pde.o pte.o vmm.o
+SRCS=	src/boot/boot.o \
+	src/kernel/main_k.o \
+	src/arch/common.o \
+	src/dev/vga.o \
+	src/kernel/kernel.o \
+	src/arch/gdt.o \
+	src/arch/gdt_setup.o \
+	src/arch/idt.o \
+	src/arch/idt_setup.o \
+	src/arch/isr.o \
+	src/arch/isr_setup.o \
+	src/arch/irq.o \
+	src/arch/irq_setup.o \
+	src/dev/timer.o \
+	src/dev/keyboard.o \
+	src/mem/pmm.o \
+	src/arch/paging_setup.o \
+	src/mem/pde.o \
+	src/mem/pte.o \
+	src/mem/vmm.o
 
-CFLAGS=-nostdlib -nostdinc -fno-builtin -fno-stack-protector -std=c11 -g
-LDFLAGS=-T link-kernel.ld
+CFLAGS=-nostdlib -nostdinc -fno-builtin -fno-stack-protector -std=c11 -g -I ./inc
+LDFLAGS=-T ./conf/link-kernel.ld
 ASFLAGS= -f elf
 
 LD=/opt/cross/bin/i386-elf-ld
@@ -11,7 +30,7 @@ CC=/opt/cross/bin/i386-elf-gcc
 all: $(SRCS) link
 
 clean:
-	-rm *.o kernel
+	-rm src/arch/*.o src/mem/*.o src/kernel/*.o src/dev/*.o src/boot/*.o  kernel
 
 run:
 	./run.sh

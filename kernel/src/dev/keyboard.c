@@ -1,7 +1,7 @@
-#include "keyboard.h"
-#include "vga.h"
-#include "common.h"
-#include "irq.h"
+#include <dev/keyboard.h>
+#include <dev/vga.h>
+#include <arch/common.h>
+#include <arch/irq.h>
 
 unsigned char us_lowercase[128] =
 {

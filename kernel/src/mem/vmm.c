@@ -1,7 +1,6 @@
-#include "vmm.h"
-#include "pmm.h"
-#include "kernel.h"
-#include "vga.h"
+#include <mem/vmm.h>
+#include <mem/pmm.h>
+#include <kernel/kernel.h>
 
 // Page table represents 4mb address space
 #define PTABLE_ADDR_SPACE_SIZE 0x400000
@@ -18,21 +17,21 @@ pdirectory* _cur_directory = 0;
 // Current page directory base register
 physical_addr _cur_pdbr = 0;
 
-pt_entry* vmmngr_ptable_lookup_entry (ptable* p,virtual_addr addr) 
+pt_entry* vmmngr_ptable_lookup_entry (ptable* p,virtual_addr addr)
 {
 	if (p)
 		return &p->m_entries[ PAGE_TABLE_INDEX (addr) ];
 	return 0;
 }
 
-pd_entry* vmmngr_pdirectory_lookup_entry (pdirectory* p, virtual_addr addr) 
+pd_entry* vmmngr_pdirectory_lookup_entry (pdirectory* p, virtual_addr addr)
 {
 	if (p)
 		return &p->m_entries[ PAGE_TABLE_INDEX (addr) ];
 	return 0;
 }
 
-int vmmngr_switch_pdirectory (pdirectory* dir) 
+int vmmngr_switch_pdirectory (pdirectory* dir)
 {
 	if (!dir)
 		return 0;
@@ -42,19 +41,19 @@ int vmmngr_switch_pdirectory (pdirectory* dir)
 	return 1;
 }
 
-void vmmngr_flush_tlb_entry (virtual_addr addr) 
+void vmmngr_flush_tlb_entry (virtual_addr addr)
 {
    __asm__ volatile("cli");
    __asm__ volatile("invlpg (%0)" :: "r"(addr) : "memory");
    __asm__ volatile("sti");
 }
 
-pdirectory* vmmngr_get_directory () 
+pdirectory* vmmngr_get_directory ()
 {
    return _cur_directory;
 }
 
-int vmmngr_alloc_page (pt_entry* e) 
+int vmmngr_alloc_page (pt_entry* e)
 {
 	// Allocate a free physical frame
 	void* p = pmmngr_alloc_block ();
@@ -69,7 +68,7 @@ int vmmngr_alloc_page (pt_entry* e)
 	return 1;
 }
 
-void vmmngr_free_page (pt_entry* e) 
+void vmmngr_free_page (pt_entry* e)
 {
 	void* p = (void*)pt_entry_pfn (*e);
 	if (p)
@@ -78,14 +77,14 @@ void vmmngr_free_page (pt_entry* e)
 	pt_entry_del_attrib (e, I86_PTE_PRESENT);
 }
 
-void vmmngr_map_page (void* phys, void* virt) 
+void vmmngr_map_page (void* phys, void* virt)
 {
    // Get page directory
    pdirectory* pageDirectory = vmmngr_get_directory ();
 
    // Get page table
    pd_entry* e = &pageDirectory->m_entries [PAGE_DIRECTORY_INDEX ((u32int_t) virt) ];
-   if ( (*e & I86_PTE_PRESENT) != I86_PTE_PRESENT) 
+   if ( (*e & I86_PTE_PRESENT) != I86_PTE_PRESENT)
    {
       // Page table not present, allocate it
       ptable* table = (ptable*) pmmngr_alloc_block ();
@@ -116,7 +115,7 @@ void vmmngr_map_page (void* phys, void* virt)
    pt_entry_add_attrib ( page, I86_PTE_PRESENT);
 }
 
-void vmmngr_initialize () 
+void vmmngr_initialize ()
 {
    // Allocate default page table
    ptable* table = (ptable*) pmmngr_alloc_block ();
@@ -138,7 +137,7 @@ void vmmngr_initialize ()
    kmemset (table, 0, sizeof (ptable));
 
    // 1st 4mb are idenitity mapped
-   for (int i = 0, frame=0x0, virt=0x00000000; i < 1024; i++, frame += 4096, virt += 4096) 
+   for (int i = 0, frame=0x0, virt=0x00000000; i < 1024; i++, frame += 4096, virt += 4096)
    {
       // Create a new page
       pt_entry page = 0;
@@ -150,7 +149,7 @@ void vmmngr_initialize ()
    }
 
    // Map 1mb to 3gb (where we are at)
-   for (int i = 0, frame=0x100000, virt=0xc0000000; i < 1024; i++, frame += 4096, virt += 4096) 
+   for (int i = 0, frame=0x100000, virt=0xc0000000; i < 1024; i++, frame += 4096, virt += 4096)
    {
       // Create a new page
       pt_entry page = 0;

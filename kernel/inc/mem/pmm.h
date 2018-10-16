@@ -1,7 +1,7 @@
 #ifndef PMM_H
 #define PMM_H
 
-#include "common.h"
+#include <arch/common.h>
 
 // Physical address
 typedef	u32int_t physical_addr;

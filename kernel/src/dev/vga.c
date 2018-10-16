@@ -1,4 +1,4 @@
-#include "vga.h"
+#include <dev/vga.h>
 
 // The VGA framebuffer starts at 0xB8000.
 u16int_t *video_memory = (u16int_t *)0xB8000;
@@ -18,7 +18,7 @@ static void move_cursor()
    outb(0x3D5, cursorLocation >> 8); // Send the high cursor byte.
    outb(0x3D4, 15);                  // Tell the VGA board we are setting the low cursor byte.
    outb(0x3D5, cursorLocation);      // Send the low cursor byte.
-} 
+}
 
 // Scrolls the text on the screen up by one line.
 static void scroll()
@@ -48,7 +48,7 @@ static void scroll()
        // The cursor should now be on the last line.
        cursor_y = 24;
    }
-} 
+}
 
 void monitor_set_bg_color(u8int_t color)
 {
@@ -118,7 +118,7 @@ void monitor_put(char c)
    scroll();
    // Move the hardware cursor.
    move_cursor();
-} 
+}
 
 // Clears the screen, by copying lots of spaces to the framebuffer.
 void monitor_clear()
@@ -137,7 +137,7 @@ void monitor_clear()
    cursor_x = 0;
    cursor_y = 0;
    move_cursor();
-} 
+}
 
 // Outputs a null-terminated ASCII string to the monitor.
 void monitor_write(char* c)
@@ -154,7 +154,7 @@ void monitor_write_center(char* c)
 	int size = 0;
 	while(c[size])
 		size++;
-	
+
 	// 40 is half the screen width.
 	int half;
 	if(size % 2 != 0)

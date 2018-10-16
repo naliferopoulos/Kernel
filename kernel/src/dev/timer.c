@@ -1,6 +1,5 @@
-#include "timer.h"
-#include "irq.h"
-#include "vga.h"
+#include <dev/timer.h>
+#include <arch/irq.h>
 
 volatile unsigned int timer_ticks = 0;
 
@@ -16,11 +15,6 @@ void timer_handler(struct regs *r)
 {
     /* Increment our 'tick count' */
     timer_ticks++;
-
-    if (timer_ticks % 100 == 0)
-    {
-        //monitor_write("One second has passed\n");
-    }
 }
 
 /* Sets up the system clock by installing the timer handler
@@ -36,9 +30,9 @@ void timer_install()
 void timer_wait(int ticks)
 {
     unsigned int eticks;
- 
+
     eticks = timer_ticks + ticks;
-    while(timer_ticks < eticks) 
+    while(timer_ticks < eticks)
     {
         __asm__ __volatile__ ("sti//hlt//cli");
     }

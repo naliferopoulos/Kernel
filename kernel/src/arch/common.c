@@ -1,4 +1,4 @@
-#include "common.h"
+#include <arch/common.h>
 
 void outb(u16int_t port, u8int_t value)
 {

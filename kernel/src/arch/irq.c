@@ -1,6 +1,6 @@
-#include "irq.h"
-#include "idt.h"
-#include "common.h"
+#include <arch/irq.h>
+#include <arch/idt.h>
+#include <arch/common.h>
 
 extern void irq0();
 extern void irq1();

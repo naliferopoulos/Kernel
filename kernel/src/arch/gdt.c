@@ -1,4 +1,4 @@
-#include "gdt.h"
+#include <arch/gdt.h>
 
 /* Our GDT, with 5 entries, and finally our special GDT pointer */
 /* Entry 0: NULL Descriptor */
@@ -60,15 +60,15 @@ void gdt_install()
     gdt_set_gate(2, 0, 0xFFFFFFFF, 0x92, 0xCF);
 
     /* The fourth entry is our User Code Segment. Same as before,
-       but has the user bit set. */ 
+       but has the user bit set. */
     gdt_set_gate(3, 0, 0xFFFFFFFF, 0xFA, 0xCF);
 
     /* The fifth entry is our User Data Segment. Same as before,
        but has the user bit set. */
     gdt_set_gate(4, 0, 0xFFFFFFFF, 0xF2, 0xCF);
 
-    /* Flush out the old GDT and install the new changes! 
-       Remember: We need to load kernel memory access 
+    /* Flush out the old GDT and install the new changes!
+       Remember: We need to load kernel memory access
        descriptors, not user ones! */
     gdt_reload_kernel();
 }

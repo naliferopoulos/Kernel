@@ -1,5 +1,5 @@
-#include "kernel.h"
-#include "vga.h"
+#include <kernel/kernel.h>
+#include <dev/vga.h>
 
 void abort()
 {
@@ -96,8 +96,8 @@ void kpanic(char* err, struct regs* r)
 	monitor_write_center("We crashed and that is sad,");
 	monitor_write_center("but if you send a screenshot our way we might be able to fix that.");
 	monitor_write_center("Thank you for using Kernel! :)");
-	
-	
+
+
 }
 
 void* kmemset(void *b, int c, int len)

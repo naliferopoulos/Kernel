@@ -1,11 +1,11 @@
 #ifndef PTE_H
 #define PTE_H
 
-#include "pmm.h"	//physical_addr
-#include "common.h"
+#include <mem/pmm.h>	//physical_addr
+#include <arch/common.h>
 
 // i86 architecture defines this format so be careful if you modify it
-enum PAGE_PTE_FLAGS 
+enum PAGE_PTE_FLAGS
 {
 
 	I86_PTE_PRESENT			=	1,			//0000000000000000000000000000001

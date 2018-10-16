@@ -1,9 +1,9 @@
 #ifndef VMM_H
 #define VMM_H
 
-#include "common.h"
-#include "pte.h"
-#include "pde.h"
+#include <arch/common.h>
+#include <mem/pte.h>
+#include <mem/pde.h>
 
 //! virtual address
 typedef u32int_t virtual_addr;
@@ -17,13 +17,13 @@ typedef u32int_t virtual_addr;
 #define PAGE_GET_PHYSICAL_ADDRESS(x) (*x & ~0xfff)
 
 // Page table
-typedef struct ptable 
+typedef struct ptable
 {
 	pt_entry m_entries[PAGES_PER_TABLE];
 } ptable;
 
 // Page directory
-typedef struct pdirectory 
+typedef struct pdirectory
 {
 	pd_entry m_entries[PAGES_PER_DIR];
 } pdirectory;
