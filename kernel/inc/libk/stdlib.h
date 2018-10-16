@@ -13,5 +13,6 @@ struct regs
 void kpanic(char* err, struct regs* r);
 void* kmemset(void* b, int c, int len);
 void abort();
+void kstrace(int depth);
 
 #endif

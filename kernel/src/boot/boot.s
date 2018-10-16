@@ -113,6 +113,8 @@ EnablePaging:
 
 start:
   call EnablePaging           ; Enable paging and remap kernel to 3GB.
+  xor ebp, ebp                ; Prepare NULL stack frame so traces know where to stop
+  push ebp
   push ebx                    ; Load multiboot header location
   cli                         ; Disable interrupts.
   call k_main                 ; Call kernel k_main().

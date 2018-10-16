@@ -184,9 +184,10 @@ int k_main(struct multiboot_info* mboot)
 	monitor_write_hex(k_main);
 	monitor_write("\n");
 
-
-
 	#endif
+
+	// For debugging purposes.
+	// kstrace(10);
 
 	//__asm__ __volatile__("int $6");
 	//timer_wait(1000);

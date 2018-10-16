@@ -8,6 +8,38 @@ void abort()
    	}
 }
 
+void kstrace(int depth)
+{
+    // Stack contains:
+    //  Second function argument
+    //  First function argument (depth)
+    //  Return address in calling function
+    //  EBP of calling function (pointed to by current EBP)
+    int * ebp = (int *)(&depth - 2);
+    int * ra = (int *)(&depth - 1);
+
+    monitor_write("Stack trace: (Return to <");
+    monitor_write_hex(ra);
+    monitor_write(">)");
+    monitor_write("\n");
+
+    for(int frame = 0; frame < depth; frame++)
+    {
+        if(ebp[1] == 0)
+          break;
+        int eip = ebp[1];
+
+        // Unwind to previous stack frame
+        ebp = (int *)(ebp[0]);
+        //unsigned int * arguments = &ebp[2];
+
+        monitor_write("    <");
+        monitor_write_hex(eip);
+        monitor_write(">");
+        monitor_write("\n");
+    }
+}
+
 void kpanic(char* err, struct regs* r)
 {
 	monitor_set_fg_color(YELLOW);
