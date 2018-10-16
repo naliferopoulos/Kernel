@@ -1,6 +1,6 @@
 SRCS=	\
   src/boot/boot.o \
-	src/kernel/main_k.o \
+	src/kernel/kernel.o \
 	src/arch/common.o \
 	src/dev/vga.o \
 	src/libk/stdlib.o \

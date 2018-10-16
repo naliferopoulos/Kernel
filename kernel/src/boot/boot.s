@@ -23,7 +23,7 @@ mboot:
                                 ; 4-byte boundary in your kernel file
   dd  MBOOT_HEADER_FLAGS        ; How GRUB should load your file / settings
   dd  MBOOT_CHECKSUM            ; To ensure that the above values are correct
-   
+
   dd  mboot                     ; Location of this descriptor
   dd  code                      ; Start of kernel '.text' (code) section.
   dd  bss                       ; End of kernel '.data' section.
@@ -31,7 +31,7 @@ mboot:
   dd  start                     ; Kernel entry point (initial EIP).
 
 [GLOBAL start]                  ; Kernel entry point.
-[EXTERN main_k]                 ; Kernel main_k().
+[EXTERN k_main]                 ; Kernel k_main().
 
 
 ; page directory table
@@ -98,7 +98,7 @@ EnablePaging:
   ; map the 768th table to physical addr 1MB
   ; the 768th table starts the 3gb virtual address
   ;------------------------------------------
- 
+
   mov   eax, PAGE_TABLE_768       ; first page table
   mov   ebx, 0x100000 | PRIV      ; starting physical address of page
   mov   ecx, PAGE_TABLE_ENTRIES     ; for every page in table...
@@ -111,11 +111,11 @@ EnablePaging:
   popa
   ret
 
-start: 
+start:
   call EnablePaging           ; Enable paging and remap kernel to 3GB.
   push ebx                    ; Load multiboot header location
   cli                         ; Disable interrupts.
-  call main_k                 ; Call kernel main_k().
+  call k_main                 ; Call kernel k_main().
   jmp $                       ; Enter an infinite loop, to stop the processor
                               ; executing whatever rubbish is in the memory
                               ; after our kernel!

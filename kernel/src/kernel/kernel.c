@@ -14,7 +14,7 @@
 
 extern int end;
 
-int main_k(struct multiboot_info* mboot)
+int k_main(struct multiboot_info* mboot)
 {
 	monitor_clear();
 	monitor_write("Welcome to Kernel!\n");
@@ -180,8 +180,8 @@ int main_k(struct multiboot_info* mboot)
 	#ifdef DEBUG_PMM
 	monitor_write("Virtual Memory works too!\n");
 
-	monitor_write("main_k() address:");
-	monitor_write_hex(main_k);
+	monitor_write("k_main() address:");
+	monitor_write_hex(k_main);
 	monitor_write("\n");
 
 
