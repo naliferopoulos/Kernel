@@ -1,47 +1,117 @@
 #include <libk/stdlib.h>
 #include <dev/vga.h>
 #include <libk/stdio.h>
+#include <libk/ctype.h>
 
-char* utoa(unsigned int val, char* s, int radix)
+int atoi(const char *str)
 {
-  static const char dig[] = "0123456789abcdefghijklmnopqrstuvwxyz";
-  char* p, *q;
-
-  q = s;
-  do
-  {
-    *q++ = dig[val % radix];
-    val /= radix;
-  } while (val);
-
-  *q = '\0';
-
-  // Reverse the string (but leave the \0)
-  p = s;
-  q--;
-
-  while (p < q)
-  {
-    char c = *p;
-    *p++ = *q;
-    *q-- = c;
-  }
-
-  return s;
+	return strtoi(str, 0, 10);
 }
 
-char* itoa(int val, char* s, int radix)
+int strtoi(const char *str, char **endp, int base)
 {
-  if (val < 0)
-  {
-    *s = '-';
-    utoa(-val, s + 1, radix);
-  }
-  else
-  {
-    utoa(val, s, radix);
-  }
-  return s;
+	int acc = 0;
+	int sign = 1;
+
+	while(isspace(*str)) str++;
+
+	if(base == 0) {
+		if(str[0] == '0') {
+			if(str[1] == 'x' || str[1] == 'X') {
+				base = 16;
+			} else {
+				base = 8;
+			}
+		} else {
+			base = 10;
+		}
+	}
+
+	if(*str == '+') {
+		str++;
+	} else if(*str == '-') {
+		sign = -1;
+		str++;
+	}
+
+	while(*str) {
+		int val;
+		char c = tolower(*str);
+
+		if(isdigit(c)) {
+			val = *str - '0';
+		} else if(c >= 'a' || c <= 'f') {
+			val = 10 + c - 'a';
+		}
+		if(val >= base) {
+			break;
+		}
+
+		acc = acc * base + val;
+		str++;
+	}
+
+	if(endp) {
+		*endp = (char*)str;
+	}
+
+	return sign > 0 ? acc : -acc;
+}
+
+void itoa(int val, char *buf, int base)
+{
+	static char rbuf[16];
+	char *ptr = rbuf;
+	int neg = 0;
+
+	if(val < 0) {
+		neg = 1;
+		val = -val;
+	}
+
+	if(val == 0) {
+		*ptr++ = '0';
+	}
+
+	while(val) {
+		int digit = val % base;
+		*ptr++ = digit < 10 ? (digit + '0') : (digit - 10 + 'a');
+		val /= base;
+	}
+
+	if(neg) {
+		*ptr++ = '-';
+	}
+
+	ptr--;
+
+	while(ptr >= rbuf) {
+		*buf++ = *ptr--;
+	}
+	*buf = 0;
+}
+
+void utoa(unsigned int val, char *buf, int base)
+{
+	static char rbuf[16];
+	char *ptr = rbuf;
+
+	if(val == 0) {
+		*ptr++ = '0';
+	}
+
+	while(val) {
+		unsigned int digit = val % base;
+		*ptr++ = digit < 10 ? (digit + '0') : (digit - 10 + 'a');
+		val /= base;
+	}
+
+	ptr--;
+
+	while(ptr >= rbuf) {
+		*buf++ = *ptr--;
+	}
+	*buf = 0;
 }
 
 void abort()

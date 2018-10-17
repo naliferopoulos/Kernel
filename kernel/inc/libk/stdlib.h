@@ -12,12 +12,16 @@ struct regs
     unsigned int eip, cs, eflags, useresp, ss;   /* pushed by the processor automatically */
 };
 
+int atoi(const char *str);
+int strtoi(const char *str, char **endp, int base);
+
+void itoa(int val, char *buf, int base);
+void utoa(unsigned int val, char *buf, int base);
+
 void kpanic(char* err, struct regs* r);
 void* kmemset(void* b, int c, int len);
 void abort();
 void kstrace(int depth);
 void kpanicAssert(char *file, int line, char *desc);
-char* itoa(int val, char * s, int radix);
-char* utoa(unsigned int val, char* s, int radix);
 
 #endif
