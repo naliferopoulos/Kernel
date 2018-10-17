@@ -188,12 +188,16 @@ int k_main(struct multiboot_info* mboot)
 
 	#endif
 
-	// For debugging purposes.
+	// For testing assertions.
+	// ASSERT(1 == 0xbadb002);
+
+	// For testing stack traces.
 	// kstrace(10);
 
-	//__asm__ __volatile__("int $6");
-	//timer_wait(1000);
-	//int zero = 0xFFFFFFFF/0;
+	// For testing exceptions.
+	// __asm__ __volatile__("int $6");
+	// timer_wait(1000);
+	// int zero = 0xFFFFFFFF/0;
 
 	return 0xDEADBEEF;
 }

@@ -1,6 +1,44 @@
 #include <libk/stdlib.h>
 #include <dev/vga.h>
 
+char * itoa(int value, char * str, int base)
+{
+    char * rc;
+    char * ptr;
+    char * low;
+    // Check for supported base.
+    if ( base < 2 || base > 36 )
+    {
+        *str = '\0';
+        return str;
+    }
+    rc = ptr = str;
+    // Set '-' for negative decimals.
+    if ( value < 0 && base == 10 )
+    {
+        *ptr++ = '-';
+    }
+    // Remember where the numbers start.
+    low = ptr;
+    // The actual conversion.
+    do
+    {
+        // Modulo is negative for negative value. This trick makes abs() unnecessary.
+        *ptr++ = "zyxwvutsrqponmlkjihgfedcba9876543210123456789abcdefghijklmnopqrstuvwxyz"[35 + value % base];
+        value /= base;
+    } while ( value );
+    // Terminating the string.
+    *ptr-- = '\0';
+    // Invert the numbers.
+    while ( low < ptr )
+    {
+        char tmp = *low;
+        *low++ = *ptr;
+        *ptr-- = tmp;
+    }
+    return rc;
+}
+
 void abort()
 {
    	while(1)
@@ -128,7 +166,7 @@ void kpanic(char* err, struct regs* r)
 	monitor_write_center("but if you send a screenshot our way we might be able to fix that.");
 	monitor_write_center("Thank you for using Kernel! :)");
 
-
+  abort();
 }
 
 void* kmemset(void *b, int c, int len)
@@ -143,4 +181,20 @@ void* kmemset(void *b, int c, int len)
       len--;
     }
   return(b);
+}
+
+void kpanicAssert(char *file, int line, char *desc)
+{
+  char string[5];
+
+  monitor_write("Assertion Failed (");
+  monitor_write(desc);
+  monitor_write(") at ");
+  monitor_write(file);
+  monitor_write(":");
+  monitor_write(itoa(line, string, 10));
+  monitor_write("\n");
+
+  abort();
+
 }
