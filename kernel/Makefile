@@ -34,10 +34,13 @@ clean:
 	-rm src/arch/*.o src/mem/*.o src/kernel/*.o src/libk/*.o src/dev/*.o src/boot/*.o  bin/kernel
 
 run:
-	./run.sh
+	-qemu-system-i386 -kernel ./bin/kernel -monitor stdio
 
 debug:
-	./debug.sh
+	-qemu-system-i386 -kernel ./bin/kernel -s -S&
+	-sleep 1
+	-gdb
+
 
 link:
 	$(LD) $(LDFLAGS) -o ./bin/kernel $(SRCS)
