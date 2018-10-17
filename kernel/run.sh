@@ -1,2 +1,2 @@
 #! /bin/bash
-qemu-system-i386 -kernel kernel -monitor stdio
+qemu-system-i386 -kernel ./bin/kernel -monitor stdio

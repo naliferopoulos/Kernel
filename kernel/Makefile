@@ -31,7 +31,7 @@ CC=/opt/cross/bin/i386-elf-gcc
 all: $(SRCS) link
 
 clean:
-	-rm src/arch/*.o src/mem/*.o src/kernel/*.o src/libk/*.o src/dev/*.o src/boot/*.o  kernel
+	-rm src/arch/*.o src/mem/*.o src/kernel/*.o src/libk/*.o src/dev/*.o src/boot/*.o  bin/kernel
 
 run:
 	./run.sh
@@ -40,7 +40,7 @@ debug:
 	./debug.sh
 
 link:
-	$(LD) $(LDFLAGS) -o kernel $(SRCS)
+	$(LD) $(LDFLAGS) -o ./bin/kernel $(SRCS)
 
 .s.o:
 	$(AS) $(ASFLAGS) $<
