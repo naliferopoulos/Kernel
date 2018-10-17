@@ -1,5 +1,6 @@
 #include <mem/pmm.h>
 #include <libk/stdlib.h>
+#include <libk/types.h>
 
 // 8 blocks per byte
 #define BLOCKS_PER_BYTE 8
@@ -11,16 +12,16 @@
 #define BLOCK_ALIGN	BLOCK_SIZE
 
 // Size of physical memory
-u32int_t mem_size = 0;
+uint32_t mem_size = 0;
 
 // Number of blocks currently in use
-u32int_t used_blocks = 0;
+uint32_t used_blocks = 0;
 
 // Maximum number of available memory blocks
-u32int_t max_blocks = 0;
+uint32_t max_blocks = 0;
 
 // Memory map bit array. Each bit represents a memory block
-u32int_t* mem_map = 0;
+uint32_t* mem_map = 0;
 
 // Enable paging!
 extern void paging_enable();
@@ -52,7 +53,7 @@ int mmap_test (int bit)
 int mmap_first_free ()
 {
 	// Find the first free bit
-	for (u32int_t i=0; i< pmmngr_get_block_count() /32; i++)
+	for (uint32_t i=0; i< pmmngr_get_block_count() /32; i++)
 		if (mem_map[i] != 0xffffffff)
 			for (int j=0; j<32; j++)
 			{				// Test each bit in the dword
@@ -73,7 +74,7 @@ int mmap_first_free_s (size_t size)
 	if (size==1)
 		return mmap_first_free ();
 
-	for (u32int_t i=0; i<pmmngr_get_block_count() /32; i++)
+	for (uint32_t i=0; i<pmmngr_get_block_count() /32; i++)
 		if (mem_map[i] != 0xffffffff)
 			for (int j=0; j<32; j++)
 			{	// Test each bit in the dword
@@ -83,8 +84,8 @@ int mmap_first_free_s (size_t size)
 					int startingBit = i*32;
 					startingBit+=bit;		// Get the free bit in the dword at index i
 
-					u32int_t free=0; // Loop through each bit to see if its enough space
-					for (u32int_t count=0; count<=size;count++)
+					uint32_t free=0; // Loop through each bit to see if its enough space
+					for (uint32_t count=0; count<=size;count++)
 					{
 						if (!mmap_test (startingBit+count))
 							free++;	// This bit is clear (free frame)
@@ -101,7 +102,7 @@ int mmap_first_free_s (size_t size)
 void pmmngr_init (size_t memSize, physical_addr bitmap)
 {
 	mem_size = memSize;
-	mem_map	= (u32int_t*) bitmap;
+	mem_map	= (uint32_t*) bitmap;
 	max_blocks	= (pmmngr_get_memory_size()*1024) / BLOCK_SIZE;
 	used_blocks	= max_blocks;
 
@@ -173,7 +174,7 @@ void* pmmngr_alloc_blocks (size_t size)
 	if (frame == -1)
 		return 0;	// Not enough space
 
-	for (u32int_t i = 0; i < size; i++)
+	for (uint32_t i = 0; i < size; i++)
 		mmap_set (frame+i);
 
 	physical_addr addr = frame * BLOCK_SIZE;
@@ -187,7 +188,7 @@ void pmmngr_free_blocks (void* p, size_t size)
 	physical_addr addr = (physical_addr)p;
 	int frame = addr / BLOCK_SIZE;
 
-	for (u32int_t i=0; i<size; i++)
+	for (uint32_t i=0; i<size; i++)
 		mmap_unset (frame+i);
 
 	used_blocks-=size;
@@ -198,22 +199,22 @@ size_t pmmngr_get_memory_size ()
 	return mem_size;
 }
 
-u32int_t pmmngr_get_block_count ()
+uint32_t pmmngr_get_block_count ()
 {
 	return max_blocks;
 }
 
-u32int_t pmmngr_get_use_block_count ()
+uint32_t pmmngr_get_use_block_count ()
 {
 	return used_blocks;
 }
 
-u32int_t pmmngr_get_free_block_count ()
+uint32_t pmmngr_get_free_block_count ()
 {
 	return max_blocks - used_blocks;
 }
 
-u32int_t pmmngr_get_block_size ()
+uint32_t pmmngr_get_block_size ()
 {
 	return BLOCK_SIZE;
 }

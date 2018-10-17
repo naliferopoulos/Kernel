@@ -1,19 +1,19 @@
 #include <dev/vga.h>
 
 // The VGA framebuffer starts at 0xB8000.
-u16int_t *video_memory = (u16int_t *)0xB8000;
+uint16_t *video_memory = (uint16_t *)0xB8000;
 // Stores the cursor position.
-u8int_t cursor_x = 0;
-u8int_t cursor_y = 0;
+uint8_t cursor_x = 0;
+uint8_t cursor_y = 0;
 
-u8int_t bg_color = BLACK;
-u8int_t fg_color = WHITE;
+uint8_t bg_color = BLACK;
+uint8_t fg_color = WHITE;
 
 // Updates the hardware cursor.
 static void move_cursor()
 {
    // The screen is 80 characters wide...
-   u16int_t cursorLocation = cursor_y * 80 + cursor_x;
+   uint16_t cursorLocation = cursor_y * 80 + cursor_x;
    outb(0x3D4, 14);                  // Tell the VGA board we are setting the high cursor byte.
    outb(0x3D5, cursorLocation >> 8); // Send the high cursor byte.
    outb(0x3D4, 15);                  // Tell the VGA board we are setting the low cursor byte.
@@ -24,9 +24,9 @@ static void move_cursor()
 static void scroll()
 {
    // Get a space character with the default colour attributes.
-   //u8int_t attributeByte = (0 /*black*/ << 4) | (15 /*white*/ & 0x0F);
-	u8int_t attributeByte = (bg_color << 4) | (fg_color & 0x0F);
-  	u16int_t blank = 0x20 /* space */ | (attributeByte << 8);
+   //uint8_t attributeByte = (0 /*black*/ << 4) | (15 /*white*/ & 0x0F);
+	uint8_t attributeByte = (bg_color << 4) | (fg_color & 0x0F);
+  	uint16_t blank = 0x20 /* space */ | (attributeByte << 8);
 
    	// Row 25 is the end, this means we need to scroll up
    	if(cursor_y >= 25)
@@ -50,12 +50,12 @@ static void scroll()
    }
 }
 
-void monitor_set_bg_color(u8int_t color)
+void monitor_set_bg_color(uint8_t color)
 {
 	bg_color = color;
 }
 
-void monitor_set_fg_color(u8int_t color)
+void monitor_set_fg_color(uint8_t color)
 {
 	fg_color = color;
 }
@@ -65,11 +65,11 @@ void monitor_put(char c)
 {
    // The attribute byte is made up of two nibbles - the lower being the
    // foreground colour, and the upper the background colour.
-   u8int_t  attributeByte = (bg_color << 4) | (fg_color & 0x0F);
+   uint8_t  attributeByte = (bg_color << 4) | (fg_color & 0x0F);
    // The attribute byte is the top 8 bits of the word we have to send to the
    // VGA board.
-   u16int_t attribute = attributeByte << 8;
-   u16int_t *location;
+   uint16_t attribute = attributeByte << 8;
+   uint16_t *location;
 
    // Handle a backspace, by moving the cursor back one space
    if (c == 0x08 && cursor_x)
@@ -124,8 +124,8 @@ void monitor_put(char c)
 void monitor_clear()
 {
    // Make an attribute byte for the default colours
-   u8int_t attributeByte = (bg_color << 4) | (fg_color & 0x0F);
-   u16int_t blank = 0x20 /* space */ | (attributeByte << 8);
+   uint8_t attributeByte = (bg_color << 4) | (fg_color & 0x0F);
+   uint16_t blank = 0x20 /* space */ | (attributeByte << 8);
 
    int i;
    for (i = 0; i < 80*25; i++)
@@ -183,8 +183,8 @@ void monitor_write_hex(int i)
 {
         monitor_write("0x");
 
-        u32int_t counter = 8;
-        u8int_t cur;
+        uint32_t counter = 8;
+        uint8_t cur;
 
         while(counter-- > 0)
         {

@@ -18,10 +18,10 @@ void monitor_write_center(char* c);
 void monitor_write_hex(int i);
 
 // Set the background color.
-void monitor_set_bg_color(u8int_t color);
+void monitor_set_bg_color(uint8_t color);
 
 // Set the foreground color.
-void monitor_set_fg_color(u8int_t color);
+void monitor_set_fg_color(uint8_t color);
 
 enum vga_color
 {

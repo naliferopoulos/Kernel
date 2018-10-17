@@ -9,6 +9,7 @@
 #include <boot/multiboot.h>
 #include <mem/pmm.h>
 #include <mem/vmm.h>
+#include <libk/stdio.h>
 
 #ifdef DEBUG
 #include <kernel/debug.h>
@@ -19,46 +20,46 @@ extern int end;
 int k_main(struct multiboot_info* mboot)
 {
 	monitor_clear();
-	monitor_write("Welcome to Kernel!\n");
+	printf("Welcome to Kernel!\n");
 
 	#ifdef DEBUG_VGA
-	monitor_write("New lines work!\n");
+	printf("New lines work!\n");
 	monitor_set_fg_color(LCYAN);
 	monitor_set_bg_color(MAGENTA);
 
-	monitor_write("Colors work too!\n");
+	printf("Colors work too!\n");
 	monitor_set_fg_color(WHITE);
 	monitor_set_bg_color(BLACK);
 	#endif
 
 	gdt_install();
 	#ifdef DEBUG_GDT
-	monitor_write("Segments work too!\n");
+	printf("Segments work too!\n");
 	#endif
 
 	idt_install();
 	#ifdef DEBUG_IDT
-	monitor_write("Interrupt descriptors work too!\n");
+	printf("Interrupt descriptors work too!\n");
 	#endif
 
 	isr_install();
 	#ifdef DEBUG_ISR
-	monitor_write("Exceptions work too!\n");
+	printf("Exceptions work too!\n");
 	#endif
 
 	irq_install();
 	#ifdef DEBUG_IRQ
-	monitor_write("Interrupts work too!\n");
+	printf("Interrupts work too!\n");
 	#endif
 
 	timer_install();
 	#ifdef DEBUG_PIC
-	monitor_write("Timer works too!\n");
+	printf("Timer works too!\n");
 	#endif
 
 	keyboard_install();
 	#ifdef DEBUG_KBD
-	monitor_write("Keyboard works too!\n");
+	printf("Keyboard works too!\n");
 	#endif
 
 	#ifdef DEBUG_BIOS_MMAP
@@ -71,12 +72,13 @@ int k_main(struct multiboot_info* mboot)
 	monitor_write("\n");
 	#endif
 
-	u32int_t memSize = 1024 + mboot->mem_lower + mboot->mem_upper * 64;
+	uint32_t memSize = 1024 + mboot->mem_lower + mboot->mem_upper * 64;
 
 	#ifdef DEBUG_BIOS_MMAP
-	monitor_write("Memory size: ");
-	monitor_write_hex(memSize);
-	monitor_write("\n");
+	char memString[10];
+	utoa(memSize, memString, 10);
+
+	printf("Memory size: %s\n", memString);
 	#endif
 
 	pmmngr_init (memSize, &end + 1);
@@ -111,85 +113,43 @@ int k_main(struct multiboot_info* mboot)
 	// Mark kernel as used!
 	pmmngr_deinit_region (0x100000, &end - 0x100000);
 
-	u32int_t total_blocks = pmmngr_get_block_count();
-	u32int_t used_blocks = pmmngr_get_use_block_count();
-	u32int_t free_blocks = pmmngr_get_free_block_count();
+	uint32_t total_blocks = pmmngr_get_block_count();
+	uint32_t used_blocks = pmmngr_get_use_block_count();
+	uint32_t free_blocks = pmmngr_get_free_block_count();
+
+	char total_blocks_string[10];
+	char used_blocks_string[10];
+	char free_blocks_string[10];
+
+	// Sanity Check
+	ASSERT(total_blocks == (used_blocks + free_blocks));
+
+	utoa(total_blocks, total_blocks_string, 10);
+	utoa(used_blocks, used_blocks_string, 10);
+	utoa(free_blocks, free_blocks_string, 10);
 
 	#ifdef DEBUG_PMM
-	monitor_write("Total blocks: ");
-	monitor_write_hex(total_blocks);
-	monitor_write("\n");
+	printf("Total blocks: %s\n", total_blocks_string);
+	printf("Used blocks: %s\n", used_blocks_string);
+	printf("Free blocks: %s\n", free_blocks_string);
 
-	monitor_write("Used blocks: ");
-	monitor_write_hex(used_blocks);
-	monitor_write("\n");
-
-	monitor_write("Free blocks: ");
-	monitor_write_hex(free_blocks);
-	monitor_write("\n");
-
-	monitor_write("Physical Memory works too!\n");
+	printf("Physical Memory works too!\n");
 	#endif
-
-	/*
-	monitor_write("\n");
-
-	monitor_write("Allocating an unsigned int.\n");
-	monitor_write("Address: ");
-	u32int_t* p = (u32int_t*)pmmngr_alloc_block ();
-	monitor_write_hex(&p);
-	monitor_write("\n");
-
-	monitor_write("\n");
-
-	monitor_write("Allocating another unsigned int.\n");
-	monitor_write("Address: ");
-	u32int_t* p2 = (u32int_t*)pmmngr_alloc_block ();
-	monitor_write_hex(&p2);
-	monitor_write("\n");
-
-	monitor_write("\n");
-
-	monitor_write("Assigning value '2' to the first one.\n");
-	*p = 2;
-
-	monitor_write("\n");
-
-	monitor_write("Assigning value '4' to the first one.\n");
-	*p2 = 4;
-
-	monitor_write("\n");
-
-	monitor_write("Value of first: ");
-	monitor_write_hex(*p);
-	monitor_write("\n");
-
-	monitor_write("Value of second: ");
-	monitor_write_hex(*p2);
-	monitor_write("\n");
-
-	monitor_write("\n");
-
-	monitor_write("Freeing first!\n");
-	pmmngr_free_block(p);
-	monitor_write("Freeing second!\n");
-	pmmngr_free_block(p2);
-	monitor_write("Done!\n");
-	*/
 
 	vmmngr_initialize ();
 
 	#ifdef DEBUG_VMM
-	monitor_write("Virtual Memory works too!\n");
+	printf("Virtual Memory works too!\n");
 
-	monitor_write("k_main() address:");
-	monitor_write_hex(k_main);
-	monitor_write("\n");
+	char k_main_address[10];
+	printf("k_main() address:");
+	utoa(k_main, k_main_address, 16);
+	printf("0x%s\n", k_main_address);
 
 	#endif
 
 	// For testing assertions.
-	// ASSERT(1 == 0xbadb002);
+	ASSERT("That's it for now!" == 0);
 
 	// For testing stack traces.
 	// kstrace(10);

@@ -1,6 +1,7 @@
 #include <mem/vmm.h>
 #include <mem/pmm.h>
 #include <libk/stdlib.h>
+#include <libk/types.h>
 
 // Page table represents 4mb address space
 #define PTABLE_ADDR_SPACE_SIZE 0x400000
@@ -83,7 +84,7 @@ void vmmngr_map_page (void* phys, void* virt)
    pdirectory* pageDirectory = vmmngr_get_directory ();
 
    // Get page table
-   pd_entry* e = &pageDirectory->m_entries [PAGE_DIRECTORY_INDEX ((u32int_t) virt) ];
+   pd_entry* e = &pageDirectory->m_entries [PAGE_DIRECTORY_INDEX ((uint32_t) virt) ];
    if ( (*e & I86_PTE_PRESENT) != I86_PTE_PRESENT)
    {
       // Page table not present, allocate it
@@ -96,7 +97,7 @@ void vmmngr_map_page (void* phys, void* virt)
 
       // Create a new entry
       pd_entry* entry =
-         &pageDirectory->m_entries [PAGE_DIRECTORY_INDEX ((u32int_t) virt)];
+         &pageDirectory->m_entries [PAGE_DIRECTORY_INDEX ((uint32_t) virt)];
 
       // Map in the table (Can also just do *entry |= 3) to enable these bits
       pd_entry_add_attrib (entry, I86_PDE_PRESENT);
@@ -108,7 +109,7 @@ void vmmngr_map_page (void* phys, void* virt)
    ptable* table = (ptable*) PAGE_GET_PHYSICAL_ADDRESS ( e );
 
    // Get page
-   pt_entry* page = &table->m_entries [ PAGE_TABLE_INDEX ( (u32int_t) virt)];
+   pt_entry* page = &table->m_entries [ PAGE_TABLE_INDEX ( (uint32_t) virt)];
 
    // Map it in (Can also do (*page |= 3 to enable..)
    pt_entry_set_frame ( page, (physical_addr) phys);

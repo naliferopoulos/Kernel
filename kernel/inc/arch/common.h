@@ -1,15 +1,10 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-typedef unsigned int 	u32int_t;
-typedef			 int 	s32int_t;
-typedef unsigned short 	u16int_t;
-typedef 		 short 	s16int_t;
-typedef unsigned char 	u8int_t;
-typedef 		 char	s8int_t;
+#include <libk/types.h>
 
-void outb(u16int_t port, u8int_t value);
-u8int_t inb(u16int_t port);
-u16int_t inw(u16int_t port);
+void outb(uint16_t port, uint8_t value);
+uint8_t inb(uint16_t port);
+uint16_t inw(uint16_t port);
 
 #endif

@@ -1,7 +1,7 @@
 #ifndef PDE_H
 #define PDE_H
 
-#include <arch/common.h>
+#include <libk/types.h>
 #include <mem/pmm.h>	//physical_addr
 
 // This format is defined by the i86 architecture--be careful if you modify it
@@ -18,17 +18,17 @@ enum PAGE_PDE_FLAGS
 	I86_PDE_4MB				=	0x80,		//0000000000000000000000010000000
 	I86_PDE_CPU_GLOBAL		=	0x100,		//0000000000000000000000100000000
 	I86_PDE_LV4_GLOBAL		=	0x200,		//0000000000000000000001000000000
-   	I86_PDE_FRAME			=	0x7FFFF000 	//1111111111111111111000000000000
+  I86_PDE_FRAME			=	0x7FFFF000 	//1111111111111111111000000000000
 };
 
 // A page directery entry
-typedef u32int_t pd_entry;
+typedef uint32_t pd_entry;
 
 // Sets a flag in the page table entry
-void pd_entry_add_attrib (pd_entry* e, u32int_t attrib);
+void pd_entry_add_attrib (pd_entry* e, uint32_t attrib);
 
 // Clears a flag in the page table entry
-void pd_entry_del_attrib (pd_entry* e, u32int_t attrib);
+void pd_entry_del_attrib (pd_entry* e, uint32_t attrib);
 
 // Sets a frame to page table entry
 void pd_entry_set_frame (pd_entry*, physical_addr);

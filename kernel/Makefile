@@ -18,7 +18,9 @@ SRCS=	\
 	src/arch/paging_setup.o \
 	src/mem/pde.o \
 	src/mem/pte.o \
-	src/mem/vmm.o
+	src/mem/vmm.o \
+	src/libk/string.o \
+	src/libk/stdio.o
 
 CFLAGS=-nostdlib -nostdinc -fno-builtin -fno-stack-protector -std=c11 -g -I ./inc -D DEBUG
 LDFLAGS=-T ./conf/link-kernel.ld

@@ -1,13 +1,13 @@
 #ifndef PMM_H
 #define PMM_H
 
-#include <arch/common.h>
+#include <libk/types.h>
 
 // Physical address
-typedef	u32int_t physical_addr;
+typedef	uint32_t physical_addr;
 
 // Size type
-typedef u32int_t size_t;
+typedef uint32_t size_t;
 
 void mmap_set (int bit);
 void mmap_unset (int bit);
@@ -38,16 +38,16 @@ void pmmngr_free_blocks (void*, size_t);
 size_t pmmngr_get_memory_size ();
 
 // Returns number of blocks currently in use
-u32int_t pmmngr_get_use_block_count ();
+uint32_t pmmngr_get_use_block_count ();
 
 // Returns number of blocks not in use
-u32int_t pmmngr_get_free_block_count ();
+uint32_t pmmngr_get_free_block_count ();
 
 // Returns number of memory blocks
-u32int_t pmmngr_get_block_count ();
+uint32_t pmmngr_get_block_count ();
 
 // Returns default memory block size in bytes
-u32int_t pmmngr_get_block_size ();
+uint32_t pmmngr_get_block_size ();
 
 // Enable or disable paging
 void pmmngr_paging_enable (int enabled);

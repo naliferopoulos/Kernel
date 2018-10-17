@@ -1,12 +1,12 @@
 #ifndef VMM_H
 #define VMM_H
 
-#include <arch/common.h>
+#include <libk/types.h>
 #include <mem/pte.h>
 #include <mem/pde.h>
 
 //! virtual address
-typedef u32int_t virtual_addr;
+typedef uint32_t virtual_addr;
 
 //! i86 architecture defines 1024 entries per table--do not change
 #define PAGES_PER_TABLE 1024
@@ -50,13 +50,13 @@ void vmmngr_flush_tlb_entry (virtual_addr addr);
 void vmmngr_ptable_clear (ptable* p);
 
 // Convert virtual address to page table index
-u32int_t vmmngr_ptable_virt_to_index (virtual_addr addr);
+uint32_t vmmngr_ptable_virt_to_index (virtual_addr addr);
 
 // Get page entry from page table
 pt_entry* vmmngr_ptable_lookup_entry (ptable* p, virtual_addr addr);
 
 // Convert virtual address to page directory index
-u32int_t vmmngr_pdirectory_virt_to_index (virtual_addr addr);
+uint32_t vmmngr_pdirectory_virt_to_index (virtual_addr addr);
 
 // Clears a page directory table
 void vmmngr_pdirectory_clear (pdirectory* dir);

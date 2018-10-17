@@ -17,6 +17,7 @@ void* kmemset(void* b, int c, int len);
 void abort();
 void kstrace(int depth);
 void kpanicAssert(char *file, int line, char *desc);
-char * itoa(int value, char * str, int base);
+char* itoa(int val, char * s, int radix);
+char* utoa(unsigned int val, char* s, int radix);
 
 #endif

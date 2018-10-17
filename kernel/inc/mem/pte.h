@@ -2,7 +2,7 @@
 #define PTE_H
 
 #include <mem/pmm.h>	//physical_addr
-#include <arch/common.h>
+#include <libk/types.h>
 
 // i86 architecture defines this format so be careful if you modify it
 enum PAGE_PTE_FLAGS
@@ -22,13 +22,13 @@ enum PAGE_PTE_FLAGS
 };
 
 // Page table entry
-typedef u32int_t pt_entry;
+typedef uint32_t pt_entry;
 
 // Sets a flag in the page table entry
-void pt_entry_add_attrib (pt_entry* e, u32int_t attrib);
+void pt_entry_add_attrib (pt_entry* e, uint32_t attrib);
 
 // Clears a flag in the page table entry
-void pt_entry_del_attrib (pt_entry* e, u32int_t attrib);
+void pt_entry_del_attrib (pt_entry* e, uint32_t attrib);
 
 // Sets a frame to page table entry
 void pt_entry_set_frame (pt_entry*, physical_addr);

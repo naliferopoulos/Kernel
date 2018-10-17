@@ -1,11 +1,12 @@
 #include <mem/pte.h>
+#include <libk/types.h>
 
-void pt_entry_add_attrib (pt_entry* e, u32int_t attrib)
+void pt_entry_add_attrib (pt_entry* e, uint32_t attrib)
 {
 	*e |= attrib;
 }
 
-void pt_entry_del_attrib (pt_entry* e, u32int_t attrib)
+void pt_entry_del_attrib (pt_entry* e, uint32_t attrib)
 {
 	*e &= ~attrib;
 }

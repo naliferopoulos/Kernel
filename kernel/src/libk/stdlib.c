@@ -1,42 +1,47 @@
 #include <libk/stdlib.h>
 #include <dev/vga.h>
+#include <libk/stdio.h>
 
-char * itoa(int value, char * str, int base)
+char* utoa(unsigned int val, char* s, int radix)
 {
-    char * rc;
-    char * ptr;
-    char * low;
-    // Check for supported base.
-    if ( base < 2 || base > 36 )
-    {
-        *str = '\0';
-        return str;
-    }
-    rc = ptr = str;
-    // Set '-' for negative decimals.
-    if ( value < 0 && base == 10 )
-    {
-        *ptr++ = '-';
-    }
-    // Remember where the numbers start.
-    low = ptr;
-    // The actual conversion.
-    do
-    {
-        // Modulo is negative for negative value. This trick makes abs() unnecessary.
-        *ptr++ = "zyxwvutsrqponmlkjihgfedcba9876543210123456789abcdefghijklmnopqrstuvwxyz"[35 + value % base];
-        value /= base;
-    } while ( value );
-    // Terminating the string.
-    *ptr-- = '\0';
-    // Invert the numbers.
-    while ( low < ptr )
-    {
-        char tmp = *low;
-        *low++ = *ptr;
-        *ptr-- = tmp;
-    }
-    return rc;
+  static const char dig[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+  char* p, *q;
+
+  q = s;
+  do
+  {
+    *q++ = dig[val % radix];
+    val /= radix;
+  } while (val);
+
+  *q = '\0';
+
+  // Reverse the string (but leave the \0)
+  p = s;
+  q--;
+
+  while (p < q)
+  {
+    char c = *p;
+    *p++ = *q;
+    *q-- = c;
+  }
+
+  return s;
+}
+
+char* itoa(int val, char* s, int radix)
+{
+  if (val < 0)
+  {
+    *s = '-';
+    utoa(-val, s + 1, radix);
+  }
+  else
+  {
+    utoa(val, s, radix);
+  }
+  return s;
 }
 
 void abort()
@@ -56,10 +61,9 @@ void kstrace(int depth)
     int * ebp = (int *)(&depth - 2);
     int * ra = (int *)(&depth - 1);
 
-    monitor_write("Stack trace: (Return to <");
+    printf("Stack trace: (Return to <");
     monitor_write_hex(ra);
-    monitor_write(">)");
-    monitor_write("\n");
+    printf(">)\n");
 
     for(int frame = 0; frame < depth; frame++)
     {
@@ -71,10 +75,9 @@ void kstrace(int depth)
         ebp = (int *)(ebp[0]);
         //unsigned int * arguments = &ebp[2];
 
-        monitor_write("    <");
+        printf("    <");
         monitor_write_hex(eip);
-        monitor_write(">");
-        monitor_write("\n");
+        printf(">\n");
     }
 }
 
@@ -85,7 +88,7 @@ void kpanic(char* err, struct regs* r)
 	monitor_clear();
 
 	for(int i = 0; i < 80; i++)
-		monitor_put('-');
+		putchar('-');
 	monitor_write_center("KERNEL PANIC");
 	for(int i = 0; i < 80; i++)
 		monitor_put('-');
@@ -186,14 +189,9 @@ void* kmemset(void *b, int c, int len)
 void kpanicAssert(char *file, int line, char *desc)
 {
   char string[5];
+  itoa(line, string, 10);
 
-  monitor_write("Assertion Failed (");
-  monitor_write(desc);
-  monitor_write(") at ");
-  monitor_write(file);
-  monitor_write(":");
-  monitor_write(itoa(line, string, 10));
-  monitor_write("\n");
+  printf("Assertion Failed (%s) at %s:%s\n", desc, file, string);
 
   abort();
 
