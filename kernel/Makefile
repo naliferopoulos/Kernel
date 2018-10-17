@@ -20,7 +20,7 @@ SRCS=	\
 	src/mem/pte.o \
 	src/mem/vmm.o
 
-CFLAGS=-nostdlib -nostdinc -fno-builtin -fno-stack-protector -std=c11 -g -I ./inc
+CFLAGS=-nostdlib -nostdinc -fno-builtin -fno-stack-protector -std=c11 -g -I ./inc -D DEBUG
 LDFLAGS=-T ./conf/link-kernel.ld
 ASFLAGS= -f elf
 

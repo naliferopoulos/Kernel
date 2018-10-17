@@ -10,7 +10,9 @@
 #include <mem/pmm.h>
 #include <mem/vmm.h>
 
+#ifdef DEBUG
 #include <kernel/debug.h>
+#endif
 
 extern int end;
 
