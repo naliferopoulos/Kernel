@@ -179,7 +179,7 @@ int k_main(struct multiboot_info* mboot)
 
 	vmmngr_initialize ();
 
-	#ifdef DEBUG_PMM
+	#ifdef DEBUG_VMM
 	monitor_write("Virtual Memory works too!\n");
 
 	monitor_write("k_main() address:");
