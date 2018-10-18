@@ -153,76 +153,171 @@ void kstrace(int depth)
 
 void kpanic(char* err, struct regs* r)
 {
-	monitor_set_fg_color(YELLOW);
 	monitor_set_bg_color(RED);
 	monitor_clear();
 
+	monitor_set_fg_color(YELLOW);
+	monitor_set_bg_color(GREEN);
+
 	for(int i = 0; i < 80; i++)
-		putchar('-');
-	monitor_write_center("KERNEL PANIC");
+		putchar(' ');
+
+	monitor_write_center("KERNEL PANIC <Oh no!>");
+
 	for(int i = 0; i < 80; i++)
-		monitor_put('-');
+		putchar(' ');
+
+	monitor_set_fg_color(YELLOW);
+	monitor_set_bg_color(RED);
+
+	monitor_write("\n");
 	monitor_write_center(err);
 	monitor_write("\n");
 
 	if(r != 0)
 	{
+		monitor_write("[");
+		monitor_set_fg_color(LGRAY);
 		monitor_write("EAX: ");
+		monitor_set_fg_color(YELLOW);
 		monitor_write_hex(r->eax);
-		monitor_write(" ");
+		monitor_write("] ");
+
+		monitor_write("[");
+		monitor_set_fg_color(LGRAY);
 		monitor_write("EBX: ");
+		monitor_set_fg_color(YELLOW);
 		monitor_write_hex(r->ebx);
-		monitor_write(" ");
+		monitor_write("] ");
+
+		monitor_write("[");
+		monitor_set_fg_color(LGRAY);
 		monitor_write("ECX: ");
+		monitor_set_fg_color(YELLOW);
 		monitor_write_hex(r->ecx);
-		monitor_write(" ");
+		monitor_write("] ");
+
+		monitor_write("[");
+		monitor_set_fg_color(LGRAY);
 		monitor_write("EDX: ");
+		monitor_set_fg_color(YELLOW);
 		monitor_write_hex(r->edx);
+		monitor_write("] ");
+
 		monitor_write("\n");
+
+		monitor_write("[");
+		monitor_set_fg_color(LGRAY);
 		monitor_write("EIP: ");
+		monitor_set_fg_color(YELLOW);
 		monitor_write_hex(r->eip);
-		monitor_write(" ");
+		monitor_write("] ");
+
+		monitor_write("[");
+		monitor_set_fg_color(LGRAY);
 		monitor_write("EBP: ");
+		monitor_set_fg_color(YELLOW);
 		monitor_write_hex(r->ebp);
-		monitor_write(" ");
+		monitor_write("] ");
+
+		monitor_write("[");
+		monitor_set_fg_color(LGRAY);
 		monitor_write("ESP: ");
+		monitor_set_fg_color(YELLOW);
 		monitor_write_hex(r->esp);
-		monitor_write(" ");
+		monitor_write("] ");
+
+		monitor_write("[");
+		monitor_set_fg_color(LGRAY);
 		monitor_write("ESI: ");
+		monitor_set_fg_color(YELLOW);
 		monitor_write_hex(r->esi);
+		monitor_write("] ");
+
 		monitor_write("\n");
+
+		monitor_write("[");
+		monitor_set_fg_color(LGRAY);
 		monitor_write("EDI: ");
+		monitor_set_fg_color(YELLOW);
 		monitor_write_hex(r->edi);
-		monitor_write(" ");
+		monitor_write("] ");
+
+		monitor_write("[");
+		monitor_set_fg_color(LGRAY);
 		monitor_write("DS:  ");
+		monitor_set_fg_color(YELLOW);
 		monitor_write_hex(r->ds);
-		monitor_write(" ");
+		monitor_write("] ");
+
+		monitor_write("[");
+		monitor_set_fg_color(LGRAY);
 		monitor_write("ES:  ");
+		monitor_set_fg_color(YELLOW);
 		monitor_write_hex(r->es);
-		monitor_write(" ");
+		monitor_write("] ");
+
+		monitor_write("[");
+		monitor_set_fg_color(LGRAY);
 		monitor_write("GS:  ");
+		monitor_set_fg_color(YELLOW);
 		monitor_write_hex(r->gs);
+		monitor_write("] ");
+
 		monitor_write("\n");
+
+		monitor_write("[");
+		monitor_set_fg_color(LGRAY);
 		monitor_write("FS:  ");
+		monitor_set_fg_color(YELLOW);
 		monitor_write_hex(r->fs);
-		monitor_write(" ");
+		monitor_write("] ");
+
+		monitor_write("[");
+		monitor_set_fg_color(LGRAY);
 		monitor_write("CS:  ");
+		monitor_set_fg_color(YELLOW);
 		monitor_write_hex(r->cs);
-		monitor_write(" ");
+		monitor_write("] ");
+
+		monitor_write("[");
+		monitor_set_fg_color(LGRAY);
 		monitor_write("SS:  ");
+		monitor_set_fg_color(YELLOW);
 		monitor_write_hex(r->ss);
-		monitor_write(" ");
+		monitor_write("] ");
+
+		monitor_write("[");
+		monitor_set_fg_color(LGRAY);
 		monitor_write("ERR: ");
+		monitor_set_fg_color(YELLOW);
 		monitor_write_hex(r->err_code);
+		monitor_write("] ");
+
 		monitor_write("\n");
+		monitor_write("\n");
+
+		monitor_write("[");
+		monitor_set_fg_color(LGRAY);
 		monitor_write("EFLAGS: ");
+		monitor_set_fg_color(YELLOW);
 		monitor_write_hex(r->eflags);
-		monitor_write("\n");
+		monitor_write("] ");
+
+		monitor_write("[");
+		monitor_set_fg_color(LGRAY);
 		monitor_write("USRESP: ");
+		monitor_set_fg_color(YELLOW);
 		monitor_write_hex(r->useresp);
-		monitor_write("\n");
+		monitor_write("] ");
+
+		monitor_write("[");
+		monitor_set_fg_color(LGRAY);
 		monitor_write("INTNO:  ");
+		monitor_set_fg_color(YELLOW);
 		monitor_write_hex(r->int_no);
+		monitor_write("] ");
+
 		monitor_write("\n");
 	}
 

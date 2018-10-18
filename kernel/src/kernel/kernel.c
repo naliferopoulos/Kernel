@@ -149,15 +149,15 @@ int k_main(struct multiboot_info* mboot)
 	#endif
 
 	// For testing assertions.
-	ASSERT("That's it for now!" == 0);
+	//ASSERT("That's it for now!" == 0);
 
 	// For testing stack traces.
 	// kstrace(10);
 
 	// For testing exceptions.
-	// __asm__ __volatile__("int $6");
-	// timer_wait(1000);
-	// int zero = 0xFFFFFFFF/0;
+	 __asm__ __volatile__("int $6");
+	 timer_wait(1000);
+	 int zero = 0xFFFFFFFF/0;
 
 	return 0xDEADBEEF;
 }
