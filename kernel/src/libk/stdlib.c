@@ -8,7 +8,7 @@ int atoi(const char *str)
 	return strtoi(str, 0, 10);
 }
 
-int strtoi(const char *str, char **endp, int base)
+int strtoi(const char* str, char** endp, int base)
 {
 	int acc = 0;
 	int sign = 1;
