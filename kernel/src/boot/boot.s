@@ -49,6 +49,9 @@ mboot:
 ; attributes (page is present;page is writable; supervisor mode)
 %define   PRIV        3
 
+; The virtual base address of the kernel
+%define KERN_VIRT_BASE 0xc0000000
+
 ;****************************************
 ; Enable Paging
 ;****************************************
@@ -111,13 +114,24 @@ EnablePaging:
   popa
   ret
 
+global start
 start:
-  call EnablePaging           ; Enable paging and remap kernel to 3GB.
-  xor ebp, ebp                ; Prepare NULL stack frame so traces know where to stop
-  push ebp
-  push ebx                    ; Load multiboot header location
   cli                         ; Disable interrupts.
+  mov esp, stack 	      ; Set up the stack.
+  call EnablePaging           ; Enable paging and remap kernel to 3GB.
+  lea ecx, [higher_half]      ; Jump to higher half kernel.
+  jmp ecx
+higher_half:
+  xor ebp, ebp                ; Prepare NULL stack frame so traces know where to stop
+  push ebp 
+  push eax		      ; Pass in the multiboot magic number.
+  ;add ebx, KERN_VIRT_BASE     ; Pass in the virtual for the multiboot info. 
+  push ebx                    ; Load multiboot header location
   call k_main                 ; Call kernel k_main().
   jmp $                       ; Enter an infinite loop, to stop the processor
                               ; executing whatever rubbish is in the memory
                               ; after our kernel!
+
+section .bss
+resb 8192
+stack:

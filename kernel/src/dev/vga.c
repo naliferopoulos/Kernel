@@ -1,4 +1,5 @@
 #include <dev/vga.h>
+#include <arch/common.h>
 
 // The VGA framebuffer starts at 0xB8000.
 uint16_t *video_memory = (uint16_t *)0xB8000;

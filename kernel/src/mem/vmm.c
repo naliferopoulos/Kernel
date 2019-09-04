@@ -38,7 +38,7 @@ int vmmngr_switch_pdirectory (pdirectory* dir)
 		return 0;
 
 	_cur_directory = dir;
-	pmmngr_load_PDBR (_cur_pdbr);
+	pmm_load_PDBR (_cur_pdbr);
 	return 1;
 }
 
@@ -57,14 +57,15 @@ pdirectory* vmmngr_get_directory ()
 int vmmngr_alloc_page (pt_entry* e)
 {
 	// Allocate a free physical frame
-	void* p = pmmngr_alloc_block ();
+	void* p = pmm_alloc_block ();
 	if (!p)
 		return 0;
 
 	// Map it to the page
 	pt_entry_set_frame (e, (physical_addr)p);
 	pt_entry_add_attrib (e, I86_PTE_PRESENT);
-	// does not set WRITE flag!
+   pt_entry_add_attrib (e, I86_PTE_WRITABLE);
+	// does set WRITE flag!
 
 	return 1;
 }
@@ -73,9 +74,10 @@ void vmmngr_free_page (pt_entry* e)
 {
 	void* p = (void*)pt_entry_pfn (*e);
 	if (p)
-		pmmngr_free_block (p);
+		pmm_free_block (p);
 
 	pt_entry_del_attrib (e, I86_PTE_PRESENT);
+   pt_entry_del_attrib (e, I86_PTE_WRITABLE);
 }
 
 void vmmngr_map_page (void* phys, void* virt)
@@ -88,7 +90,7 @@ void vmmngr_map_page (void* phys, void* virt)
    if ( (*e & I86_PTE_PRESENT) != I86_PTE_PRESENT)
    {
       // Page table not present, allocate it
-      ptable* table = (ptable*) pmmngr_alloc_block ();
+      ptable* table = (ptable*) pmm_alloc_block ();
       if (!table)
          return;
 
@@ -114,12 +116,13 @@ void vmmngr_map_page (void* phys, void* virt)
    // Map it in (Can also do (*page |= 3 to enable..)
    pt_entry_set_frame ( page, (physical_addr) phys);
    pt_entry_add_attrib ( page, I86_PTE_PRESENT);
+   pt_entry_add_attrib ( page, I86_PTE_WRITABLE);
 }
 
 void vmmngr_initialize ()
 {
    // Allocate default page table
-   ptable* table = (ptable*) pmmngr_alloc_block ();
+   ptable* table = (ptable*) pmm_alloc_block ();
    if (!table)
    {
       kpanic("Failed to allocate ptable!", 0);
@@ -127,7 +130,7 @@ void vmmngr_initialize ()
    }
 
    // Allocates 3gb page table
-   ptable* table2 = (ptable*) pmmngr_alloc_block ();
+   ptable* table2 = (ptable*) pmm_alloc_block ();
    if (!table2)
    {
       kpanic("Failed to allocate ptable!", 0);
@@ -143,6 +146,7 @@ void vmmngr_initialize ()
       // Create a new page
       pt_entry page = 0;
       pt_entry_add_attrib (&page, I86_PTE_PRESENT);
+      pt_entry_add_attrib (&page, I86_PTE_WRITABLE);
       pt_entry_set_frame (&page, frame);
 
       // ...and add it to the page table
@@ -155,6 +159,7 @@ void vmmngr_initialize ()
       // Create a new page
       pt_entry page = 0;
       pt_entry_add_attrib (&page, I86_PTE_PRESENT);
+      pt_entry_add_attrib (&page, I86_PTE_WRITABLE);
       pt_entry_set_frame (&page, frame);
 
       // ...and add it to the page table
@@ -162,7 +167,7 @@ void vmmngr_initialize ()
    }
 
    // Create default directory table
-   pdirectory* dir = (pdirectory*) pmmngr_alloc_blocks (3);
+   pdirectory* dir = (pdirectory*) pmm_alloc_blocks (3);
    if (!dir)
    {
       kpanic("Failed to allocate pdir!", 0);
@@ -190,5 +195,5 @@ void vmmngr_initialize ()
    vmmngr_switch_pdirectory (dir);
 
    // Enable paging
-   pmmngr_paging_enable (1);
+   pmm_paging_enable (1);
 }

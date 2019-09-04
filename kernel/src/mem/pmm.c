@@ -29,34 +29,35 @@ extern void paging_enable();
 // Disable paging!
 extern void paging_disable();
 
-extern physical_addr pmmngr_get_PDBR();
+extern physical_addr pmm_get_PDBR();
 
 // Set any bit (frame) within the memory map bit array
-void mmap_set (int bit)
+static void pmm_set (int bit)
 {
 	mem_map[bit / 32] |= (1 << (bit % 32));
 }
 
 // Unset any bit (frame) within the memory map bit array
-void mmap_unset (int bit)
+static void pmm_unset (int bit)
 {
 	mem_map[bit / 32] &= ~ (1 << (bit % 32));
 }
 
 // Test if any bit (frame) is set within the memory map bit array
-int mmap_test (int bit)
+static int pmm_test (int bit)
 {
 	return mem_map[bit / 32] &  (1 << (bit % 32));
 }
 
 // Finds first free frame in the bit array and returns its index
-int mmap_first_free ()
+static int pmm_first_free ()
 {
 	// Find the first free bit
-	for (uint32_t i=0; i< pmmngr_get_block_count() /32; i++)
+	for (uint32_t i=0; i< pmm_get_block_count() / 32; i++)
 		if (mem_map[i] != 0xffffffff)
 			for (int j=0; j<32; j++)
-			{				// Test each bit in the dword
+			{	
+				// Test each bit in the dword
 				int bit = 1 << j;
 				if (!(mem_map[i] & bit))
 					return i*4*8+j;
@@ -66,18 +67,19 @@ int mmap_first_free ()
 }
 
 // Finds first free "size" number of frames and returns its index
-int mmap_first_free_s (size_t size)
+static int pmm_first_free_s (size_t size)
 {
-	if (size==0)
+	if (size == 0)
 		return -1;
 
-	if (size==1)
-		return mmap_first_free ();
+	if (size == 1)
+		return pmm_first_free ();
 
-	for (uint32_t i=0; i<pmmngr_get_block_count() /32; i++)
+	for (uint32_t i = 0; i < pmm_get_block_count() / 32; i++)
 		if (mem_map[i] != 0xffffffff)
-			for (int j=0; j<32; j++)
-			{	// Test each bit in the dword
+			for (int j = 0; j < 32; j++)
+			{	
+				// Test each bit in the dword
 				int bit = 1<<j;
 				if (! (mem_map[i] & bit) )
 				{
@@ -87,7 +89,7 @@ int mmap_first_free_s (size_t size)
 					uint32_t free=0; // Loop through each bit to see if its enough space
 					for (uint32_t count=0; count<=size;count++)
 					{
-						if (!mmap_test (startingBit+count))
+						if (!pmm_test (startingBit+count))
 							free++;	// This bit is clear (free frame)
 
 						if (free==size)
@@ -99,54 +101,54 @@ int mmap_first_free_s (size_t size)
 	return -1;
 }
 
-void pmmngr_init (size_t memSize, physical_addr bitmap)
+void pmm_init (size_t memSize, physical_addr bitmap)
 {
 	mem_size = memSize;
 	mem_map	= (uint32_t*) bitmap;
-	max_blocks	= (pmmngr_get_memory_size()*1024) / BLOCK_SIZE;
+	max_blocks	= (pmm_get_memory_size() * 1024) / BLOCK_SIZE;
 	used_blocks	= max_blocks;
 
 	// By default, all of memory is in use
-	kmemset (mem_map, 0xf, pmmngr_get_block_count() / BLOCKS_PER_BYTE );
+	kmemset (mem_map, 0xf, pmm_get_block_count() / BLOCKS_PER_BYTE );
 }
 
-void pmmngr_init_region (physical_addr base, size_t size)
+void pmm_init_region (physical_addr base, size_t size)
 {
 	int align = base / BLOCK_SIZE;
 	int blocks = size / BLOCK_SIZE;
 
 	for (; blocks>=0; blocks--)
 	{
-		mmap_unset (align++);
+		pmm_unset (align++);
 		used_blocks--;
 	}
 
-	mmap_set (0);	// First block is always set. This insures allocs cant be 0.
+	pmm_set (0);	// First block is always set. This insures allocs cant be 0.
 }
 
-void pmmngr_deinit_region (physical_addr base, size_t size)
+void pmm_deinit_region (physical_addr base, size_t size)
 {
 	int align = base / BLOCK_SIZE;
 	int blocks = size / BLOCK_SIZE;
 
 	for (; blocks>=0; blocks--)
 	{
-		mmap_set (align++);
+		pmm_set (align++);
 		used_blocks++;
 	}
 }
 
-void* pmmngr_alloc_block ()
+void* pmm_alloc_block ()
 {
-	if (pmmngr_get_free_block_count() <= 0)
+	if (pmm_get_free_block_count() <= 0)
 		return 0;	// Out of memory
 
-	int frame = mmap_first_free ();
+	int frame = pmm_first_free ();
 
 	if (frame == -1)
 		return 0;	// Out of memory
 
-	mmap_set (frame);
+	pmm_set (frame);
 
 	physical_addr addr = frame * BLOCK_SIZE;
 	used_blocks++;
@@ -154,28 +156,28 @@ void* pmmngr_alloc_block ()
 	return (void*)addr;
 }
 
-void pmmngr_free_block (void* p)
+void pmm_free_block (void* p)
 {
 	physical_addr addr = (physical_addr)p;
 	int frame = addr / BLOCK_SIZE;
 
-	mmap_unset (frame);
+	pmm_unset (frame);
 
 	used_blocks--;
 }
 
-void* pmmngr_alloc_blocks (size_t size)
+void* pmm_alloc_blocks (size_t size)
 {
-	if (pmmngr_get_free_block_count() <= size)
+	if (pmm_get_free_block_count() <= size)
 		return 0;	// Not enough space
 
-	int frame = mmap_first_free_s (size);
+	int frame = pmm_first_free_s (size);
 
 	if (frame == -1)
 		return 0;	// Not enough space
 
 	for (uint32_t i = 0; i < size; i++)
-		mmap_set (frame+i);
+		pmm_set (frame+i);
 
 	physical_addr addr = frame * BLOCK_SIZE;
 	used_blocks+=size;
@@ -183,43 +185,43 @@ void* pmmngr_alloc_blocks (size_t size)
 	return (void*)addr;
 }
 
-void pmmngr_free_blocks (void* p, size_t size)
+void pmm_free_blocks (void* p, size_t size)
 {
 	physical_addr addr = (physical_addr)p;
 	int frame = addr / BLOCK_SIZE;
 
 	for (uint32_t i=0; i<size; i++)
-		mmap_unset (frame+i);
+		pmm_unset (frame+i);
 
 	used_blocks-=size;
 }
 
-size_t pmmngr_get_memory_size ()
+size_t pmm_get_memory_size ()
 {
 	return mem_size;
 }
 
-uint32_t pmmngr_get_block_count ()
+uint32_t pmm_get_block_count ()
 {
 	return max_blocks;
 }
 
-uint32_t pmmngr_get_use_block_count ()
+uint32_t pmm_get_use_block_count ()
 {
 	return used_blocks;
 }
 
-uint32_t pmmngr_get_free_block_count ()
+uint32_t pmm_get_free_block_count ()
 {
 	return max_blocks - used_blocks;
 }
 
-uint32_t pmmngr_get_block_size ()
+uint32_t pmm_get_block_size ()
 {
 	return BLOCK_SIZE;
 }
 
-void pmmngr_paging_enable (int b)
+void pmm_paging_enable (int b)
 {
 	if(b == 0)
 		paging_disable();
@@ -228,7 +230,7 @@ void pmmngr_paging_enable (int b)
 }
 
 // Load cr3
-void pmmngr_load_PDBR(physical_addr addr)
+void pmm_load_PDBR(physical_addr addr)
 {
 	__asm__ volatile("mov %0, %%cr3":: "r"(addr));
 }

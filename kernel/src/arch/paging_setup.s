@@ -1,6 +1,6 @@
 [GLOBAL paging_enable]
 [GLOBAL paging_disable]
-[GLOBAL pmmngr_get_PDBR]
+[GLOBAL pmm_get_PDBR]
 
 paging_enable:
 	mov	eax, cr0
@@ -14,6 +14,6 @@ paging_disable:
 	mov	cr0, eax
 	ret
 
-pmmngr_get_PDBR:
+pmm_get_PDBR:
 	mov eax, cr3
 	ret

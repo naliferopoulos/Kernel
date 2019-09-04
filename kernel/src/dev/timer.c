@@ -1,5 +1,6 @@
 #include <dev/timer.h>
 #include <arch/irq.h>
+#include <arch/common.h>
 
 volatile unsigned int timer_ticks = 0;
 

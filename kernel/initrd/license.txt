@@ -1,0 +1,4 @@
+The programs included with the Kernel are free software.
+
+Kernel comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.

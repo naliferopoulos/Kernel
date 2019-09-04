@@ -8,3 +8,4 @@
 #define DEBUG_KBD
 #define DEBUG_PMM
 #define DEBUG_VMM
+#define DEBUG_RD

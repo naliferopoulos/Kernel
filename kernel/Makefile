@@ -1,5 +1,5 @@
 SRCS=	\
-  src/boot/boot.o \
+  	src/boot/boot.o \
 	src/kernel/kernel.o \
 	src/arch/common.o \
 	src/dev/vga.o \
@@ -19,9 +19,12 @@ SRCS=	\
 	src/mem/pde.o \
 	src/mem/pte.o \
 	src/mem/vmm.o \
+	src/mem/heap.o \
 	src/libk/string.o \
 	src/libk/stdio.o \
-	src/libk/ctype.o
+	src/libk/ctype.o \
+	src/fs/fs.o \
+	src/dev/initrd.o 
 
 CFLAGS=-nostdlib -nostdinc -fno-builtin -fno-stack-protector -std=c11 -g -I ./inc -D DEBUG
 LDFLAGS=-T ./conf/link-kernel.ld
@@ -31,22 +34,40 @@ LD=/opt/cross/bin/i386-elf-ld
 AS=nasm
 CC=/opt/cross/bin/i386-elf-gcc
 
-all: $(SRCS) link
+all: 	$(SRCS) link ramdisk
+	@printf "\n[+] Done!\n\n"
+	@printf "\n\tWelcome to Kernel!\t\n\n"
+	@printf "This is your first step towards insanity.\n"
+	@printf "The code sucks, the bugs thrive, the features lack.\n"
+	@printf "Considered yourself warned!\n"
+	@printf "Have fun!\n"
+	@printf "\n\t- Nick\n"
 
 clean:
-	-rm src/arch/*.o src/mem/*.o src/kernel/*.o src/libk/*.o src/dev/*.o src/boot/*.o  bin/kernel
+	@printf "\n[+] Cleaning...\n\n"
+	@-rm -rf src/arch/*.o src/mem/*.o src/kernel/*.o src/libk/*.o src/dev/*.o src/boot/*.o  bin/kernel bin/initrd.img
 
 run:
-	-qemu-system-i386 -kernel ./bin/kernel -monitor stdio
+	@printf "\n[+] Running...\n\n"
+	@-qemu-system-i386 -kernel ./bin/kernel -monitor stdio -name Kernel -initrd ./bin/initrd.img -m 512
 
 debug:
-	-qemu-system-i386 -kernel ./bin/kernel -s -S&
-	-sleep 1
-	-gdb
-
+	@printf "\n[+] Running in debug mode...\n\n"
+	@-qemu-system-i386 -kernel ./bin/kernel -initrd ./bin/initrd.img -m 512 -s -S&
+	@-sleep 1
+	@-gdb
 
 link:
-	$(LD) $(LDFLAGS) -o ./bin/kernel $(SRCS)
+	@printf "\n[+] Creating Kernel Image...\n\n"
+	@$(LD) $(LDFLAGS) -o ./bin/kernel $(SRCS)
+
+toolchain:
+	@printf "\n[+] Creating Toolchain...\n\n"
+	@-gcc tools/rdgen.c -o tools/rdgen
+
+ramdisk:
+	@printf "\n[+] Generating Ramdisk...\n\n"
+	@-cd initrd && ../tools/rdgen ../bin/initrd.img * 
 
 .s.o:
-	$(AS) $(ASFLAGS) $<
+	@$(AS) $(ASFLAGS) $<

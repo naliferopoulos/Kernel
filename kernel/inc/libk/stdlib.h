@@ -15,8 +15,8 @@ struct regs
 int atoi(const char *str);
 int strtoi(const char *str, char **endp, int base);
 
-void itoa(int val, char *buf, int base);
-void utoa(unsigned int val, char *buf, int base);
+void itoa(long val, char *buf, int base);
+void utoa(unsigned long val, char *buf, int base);
 
 void kpanic(char* err, struct regs* r);
 void* kmemset(void* b, int c, int len);

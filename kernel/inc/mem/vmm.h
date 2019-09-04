@@ -61,6 +61,9 @@ uint32_t vmmngr_pdirectory_virt_to_index (virtual_addr addr);
 // Clears a page directory table
 void vmmngr_pdirectory_clear (pdirectory* dir);
 
+// Maps a physical to a virtual page
+void vmmngr_map_page (void* phys, void* virt);
+
 // Get directory entry from directory table
 pd_entry* vmmngr_pdirectory_lookup_entry (pdirectory* p, virtual_addr addr);
 
