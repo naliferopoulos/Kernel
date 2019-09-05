@@ -2,6 +2,7 @@
 #include <libk/stdlib.h>
 #include <libk/types.h>
 #include <task/spinlock.h>
+#include <ds/bitmap.h>
 
 // 8 blocks per byte
 #define BLOCKS_PER_BYTE 8
@@ -21,8 +22,8 @@ uint32_t used_blocks = 0;
 // Maximum number of available memory blocks
 uint32_t max_blocks = 0;
 
-// Memory map bit array. Each bit represents a memory block
-uint32_t* mem_map = 0;
+// Memory bitmap. Each bit represents a memory block
+bitmap_t* mem_map = 0;
 
 // Frame allocator spinlock
 spinlock_t pmm_lock = {.lock = 0};
@@ -34,24 +35,6 @@ extern void paging_enable();
 extern void paging_disable();
 
 extern physical_addr pmm_get_PDBR();
-
-// Set any bit (frame) within the memory map bit array
-static void pmm_set (int bit)
-{
-	mem_map[bit / 32] |= (1 << (bit % 32));
-}
-
-// Unset any bit (frame) within the memory map bit array
-static void pmm_unset (int bit)
-{
-	mem_map[bit / 32] &= ~ (1 << (bit % 32));
-}
-
-// Test if any bit (frame) is set within the memory map bit array
-static int pmm_test (int bit)
-{
-	return mem_map[bit / 32] &  (1 << (bit % 32));
-}
 
 // Finds first free frame in the bit array and returns its index
 static int pmm_first_free ()
@@ -88,12 +71,12 @@ static int pmm_first_free_s (size_t size)
 				if (! (mem_map[i] & bit) )
 				{
 					int startingBit = i*32;
-					startingBit+=bit;		// Get the free bit in the dword at index i
+					startingBit+=bit; // Get the free bit in the dword at index i
 
 					uint32_t free=0; // Loop through each bit to see if its enough space
 					for (uint32_t count=0; count<=size;count++)
 					{
-						if (!pmm_test (startingBit+count))
+						if (!bitmap_test(mem_map, startingBit+count))
 							free++;	// This bit is clear (free frame)
 
 						if (free==size)
@@ -116,6 +99,9 @@ void pmm_init (size_t memSize, physical_addr bitmap)
 	kmemset (mem_map, 0xf, pmm_get_block_count() / BLOCKS_PER_BYTE );
 }
 
+// NOTE: pmm_init_region and pmm_deinit_region are expected to only be called before tasking is initialized.
+// Due to that, they are not implemented to be atomic!
+
 void pmm_init_region (physical_addr base, size_t size)
 {
 	int align = base / BLOCK_SIZE;
@@ -123,11 +109,11 @@ void pmm_init_region (physical_addr base, size_t size)
 
 	for (; blocks>=0; blocks--)
 	{
-		pmm_unset (align++);
+		bitmap_unset(mem_map, align++);
 		used_blocks--;
 	}
 
-	pmm_set (0);	// First block is always set. This insures allocs cant be 0.
+	bitmap_set(mem_map, 0);	// First block is always set. This ensures allocs cant be 0.
 }
 
 void pmm_deinit_region (physical_addr base, size_t size)
@@ -137,7 +123,7 @@ void pmm_deinit_region (physical_addr base, size_t size)
 
 	for (; blocks>=0; blocks--)
 	{
-		pmm_set (align++);
+		bitmap_set(mem_map, align++);
 		used_blocks++;
 	}
 }
@@ -154,7 +140,7 @@ void* pmm_alloc_block ()
 	if (frame == -1)
 		return 0;	// Out of memory
 
-	pmm_set (frame);
+	bitmap_set(mem_map, frame);
 
 	physical_addr addr = frame * BLOCK_SIZE;
 	used_blocks++;
@@ -171,7 +157,7 @@ void pmm_free_block (void* p)
 	physical_addr addr = (physical_addr)p;
 	int frame = addr / BLOCK_SIZE;
 
-	pmm_unset (frame);
+	bitmap_unset(mem_map, frame);
 
 	used_blocks--;
 
@@ -191,7 +177,7 @@ void* pmm_alloc_blocks (size_t size)
 		return 0;	// Not enough space
 
 	for (uint32_t i = 0; i < size; i++)
-		pmm_set (frame+i);
+		bitmap_set(mem_map, frame+i);
 
 	physical_addr addr = frame * BLOCK_SIZE;
 	used_blocks+=size;
@@ -209,7 +195,7 @@ void pmm_free_blocks (void* p, size_t size)
 	int frame = addr / BLOCK_SIZE;
 
 	for (uint32_t i=0; i<size; i++)
-		pmm_unset (frame+i);
+		bitmap_unset(mem_map, frame+i);
 
 	used_blocks-=size;
 
