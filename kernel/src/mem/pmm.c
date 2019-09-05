@@ -1,6 +1,7 @@
 #include <mem/pmm.h>
 #include <libk/stdlib.h>
 #include <libk/types.h>
+#include <task/spinlock.h>
 
 // 8 blocks per byte
 #define BLOCKS_PER_BYTE 8
@@ -22,6 +23,9 @@ uint32_t max_blocks = 0;
 
 // Memory map bit array. Each bit represents a memory block
 uint32_t* mem_map = 0;
+
+// Frame allocator spinlock
+spinlock_t pmm_lock = {.lock = 0};
 
 // Enable paging!
 extern void paging_enable();
@@ -140,6 +144,8 @@ void pmm_deinit_region (physical_addr base, size_t size)
 
 void* pmm_alloc_block ()
 {
+	acquire_spinlock(&pmm_lock);
+
 	if (pmm_get_free_block_count() <= 0)
 		return 0;	// Out of memory
 
@@ -153,21 +159,29 @@ void* pmm_alloc_block ()
 	physical_addr addr = frame * BLOCK_SIZE;
 	used_blocks++;
 
+	release_spinlock(&pmm_lock);
+
 	return (void*)addr;
 }
 
 void pmm_free_block (void* p)
 {
+	acquire_spinlock(&pmm_lock);
+
 	physical_addr addr = (physical_addr)p;
 	int frame = addr / BLOCK_SIZE;
 
 	pmm_unset (frame);
 
 	used_blocks--;
+
+	release_spinlock(&pmm_lock);
 }
 
 void* pmm_alloc_blocks (size_t size)
 {
+	acquire_spinlock(&pmm_lock);
+
 	if (pmm_get_free_block_count() <= size)
 		return 0;	// Not enough space
 
@@ -182,11 +196,15 @@ void* pmm_alloc_blocks (size_t size)
 	physical_addr addr = frame * BLOCK_SIZE;
 	used_blocks+=size;
 
+	release_spinlock(&pmm_lock);
+
 	return (void*)addr;
 }
 
 void pmm_free_blocks (void* p, size_t size)
 {
+	acquire_spinlock(&pmm_lock);
+
 	physical_addr addr = (physical_addr)p;
 	int frame = addr / BLOCK_SIZE;
 
@@ -194,6 +212,8 @@ void pmm_free_blocks (void* p, size_t size)
 		pmm_unset (frame+i);
 
 	used_blocks-=size;
+
+	release_spinlock(&pmm_lock);
 }
 
 size_t pmm_get_memory_size ()

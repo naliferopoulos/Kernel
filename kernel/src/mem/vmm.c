@@ -2,6 +2,7 @@
 #include <mem/pmm.h>
 #include <libk/stdlib.h>
 #include <libk/types.h>
+#include <task/spinlock.h>
 
 // Page table represents 4mb address space
 #define PTABLE_ADDR_SPACE_SIZE 0x400000
@@ -17,6 +18,9 @@ pdirectory* _cur_directory = 0;
 
 // Current page directory base register
 physical_addr _cur_pdbr = 0;
+
+// Virtual allocator spinlock
+spinlock_t vmm_lock = {.lock = 0};
 
 pt_entry* vmmngr_ptable_lookup_entry (ptable* p,virtual_addr addr)
 {
@@ -56,6 +60,8 @@ pdirectory* vmmngr_get_directory ()
 
 int vmmngr_alloc_page (pt_entry* e)
 {
+   acquire_spinlock(&vmm_lock);
+
 	// Allocate a free physical frame
 	void* p = pmm_alloc_block ();
 	if (!p)
@@ -67,21 +73,29 @@ int vmmngr_alloc_page (pt_entry* e)
    pt_entry_add_attrib (e, I86_PTE_WRITABLE);
 	// does set WRITE flag!
 
+   release_spinlock(&vmm_lock);
+
 	return 1;
 }
 
 void vmmngr_free_page (pt_entry* e)
 {
+   acquire_spinlock(&vmm_lock);
+
 	void* p = (void*)pt_entry_pfn (*e);
 	if (p)
 		pmm_free_block (p);
 
 	pt_entry_del_attrib (e, I86_PTE_PRESENT);
    pt_entry_del_attrib (e, I86_PTE_WRITABLE);
+
+   release_spinlock(&vmm_lock);
 }
 
 void vmmngr_map_page (void* phys, void* virt)
 {
+   acquire_spinlock(&vmm_lock);
+
    // Get page directory
    pdirectory* pageDirectory = vmmngr_get_directory ();
 
@@ -117,6 +131,8 @@ void vmmngr_map_page (void* phys, void* virt)
    pt_entry_set_frame ( page, (physical_addr) phys);
    pt_entry_add_attrib ( page, I86_PTE_PRESENT);
    pt_entry_add_attrib ( page, I86_PTE_WRITABLE);
+
+   release_spinlock(&vmm_lock);
 }
 
 void vmmngr_initialize ()
