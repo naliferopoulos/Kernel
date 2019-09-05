@@ -8,6 +8,6 @@ typedef struct {
 } spinlock_t;
 
 extern void acquire_spinlock(spinlock_t* spinlock);
-extern void release_spinlock(spinlock_t* spinlock)
+extern void release_spinlock(spinlock_t* spinlock);
 
 #endif

@@ -24,7 +24,8 @@ SRCS=	\
 	src/libk/stdio.o \
 	src/libk/ctype.o \
 	src/fs/fs.o \
-	src/dev/initrd.o 
+	src/dev/initrd.o \
+	src/task/spinlock.o
 
 CFLAGS=-nostdlib -nostdinc -fno-builtin -fno-stack-protector -std=c11 -g -I ./inc -D DEBUG
 LDFLAGS=-T ./conf/link-kernel.ld

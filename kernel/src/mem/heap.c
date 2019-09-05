@@ -3,8 +3,11 @@
 #include <mem/vmm.h>
 #include <libk/stdio.h>
 #include <libk/stdbool.h>
+#include <task/spinlock.h>
 
 uint32_t* heapPos = (uint32_t*)HEAP_POS;
+
+static spinlock_t heap_lock = {.lock = 0};
 
 static void* heap_base_ptr=NULL;
 
@@ -19,16 +22,8 @@ typedef struct blck_metadata_t {
 
 #define blck_metadata_t_SIZE sizeof(blck_metadata_t)
 
-/*
- *  All pointers returned by malloc will be aligned for long type.
- *    8 aligned for x86-64 and 4 for x86-32
- *
- *  TODO: find out why glibc malloc returns 16-byte aligned pointers
- *  (http://stackoverflow.com/a/3994235/3051060) 
- */
 static inline size_t align_long(size_t size) 
 {
-	/* This alignment function was borrowed from redis zmalloc */
 	if (size & (sizeof(long) - 1)) 
 	{
 		size += sizeof(long) - (size & (sizeof(long) - 1));
@@ -37,21 +32,12 @@ static inline size_t align_long(size_t size)
 	return size;
 }
 
-/*
- *  a suitable block is one that is free and has at least the size we are asking for
- */
 static inline bool is_suitable_block(blck_metadata_t* block, size_t size) 
 {
 	return block->is_free && block->size >= size;
 }
 
-/**
- *  Returns a block if it finds a suitable one or NULL otherwise
- *
- *  @param blck_metadata_t* last is used just to make it easy to extend
- *    the heap in case no suitable block is found
- */
-blck_metadata_t* get_free_block(blck_metadata_t** last, size_t size) 
+static blck_metadata_t* get_free_block(blck_metadata_t** last, size_t size) 
 {
 	blck_metadata_t* block_runner = (blck_metadata_t*)heap_base_ptr;
 	
@@ -64,13 +50,7 @@ blck_metadata_t* get_free_block(blck_metadata_t** last, size_t size)
 	return block_runner;
 }
 
-/*
- *  Extends the heap using srbk like system calls
- * 
- *  @param blck_metadata_t* last: pointer to the last block allocated before a call to extend_heap
- *  @param size_t size: size of the requested new block
- */
-blck_metadata_t* extend_heap(blck_metadata_t* last, size_t size) 
+static blck_metadata_t* extend_heap(blck_metadata_t* last, size_t size) 
 {
 	blck_metadata_t* block = (blck_metadata_t*) heapPos;
 
@@ -102,13 +82,7 @@ blck_metadata_t* extend_heap(blck_metadata_t* last, size_t size)
 	return block;
 }
 
-/**
- *  Splits @block to have the @size size and creates a new block with the remaining space
- *
- *  @parm blck_metadata_t* block: block to be splitted
- *  @size_t size new block size
- */
-void split_block(blck_metadata_t* block, size_t size) 
+static void split_block(blck_metadata_t* block, size_t size) 
 {
 	blck_metadata_t* new_block = (blck_metadata_t*) (block->blck_metadata_t_end + size); // important to have the blck_metadata_t_end as char[0] for the pointer arithmetic
 	new_block->size = block->size - size - blck_metadata_t_SIZE;
@@ -125,11 +99,10 @@ void split_block(blck_metadata_t* block, size_t size)
 	}
 }
 
-/*
- *  Malloc implementation using 'first fit' algorithm
- */
 void* kmalloc(size_t size) 
 {
+	acquire_spinlock(&heap_lock);
+
 	size_t aligned_size = align_long(size);
 	blck_metadata_t* block_to_return = NULL;
 
@@ -165,17 +138,12 @@ void* kmalloc(size_t size)
     	}
   	}
 
+  release_spinlock(&heap_lock);
+
   return block_to_return->blck_metadata_t_end;
 }
 
-
-/*
- *  If a block is next to other empty blocks, merges them into one
- *    This is a way to minimize memory fragmentatio
- *
- *  @param blck_metadata_t* block
- */
-blck_metadata_t* merge_block_with_next(blck_metadata_t* block) 
+static blck_metadata_t* merge_block_with_next(blck_metadata_t* block) 
 {
 	if (block->next && block->next->is_free) 
 	{
@@ -191,39 +159,30 @@ blck_metadata_t* merge_block_with_next(blck_metadata_t* block)
 	return block;
 }
 
-/*
- *  Given a @ptr, it returns a pointer the it's blck_metadata_t
- *
- *  @param void* ptr
- */
-blck_metadata_t* get_blck_metadata_t_from_ptr(void* ptr) 
+static blck_metadata_t* get_blck_metadata_t_from_ptr(void* ptr) 
 {
-	char* aux = (char*)ptr; // needed for the pointer arithmetic on the return statement
+	char* aux = (char*)ptr; 
 	return (blck_metadata_t*)(aux - blck_metadata_t_SIZE);
 }
 
-bool is_valid_ptr(void* ptr) 
+static bool is_valid_ptr(void* ptr) 
 {
   if (heap_base_ptr) 
   {
 	if (ptr > heap_base_ptr && ptr < (void *)heapPos) 
-	{ // heap range check
-		return (ptr == get_blck_metadata_t_from_ptr(ptr)->validation_ptr); // using the validation_ptr we are able to validate @ptr
+	{ 
+		// heap range check
+		return (ptr == get_blck_metadata_t_from_ptr(ptr)->validation_ptr); 
 	}
   }
 
   return false;
 }
 
-/*
- *  Free implementation
- *
- *   It's mandatory that the free function can:
- *     1) Validate the input pointer (is it really a malloc’ed pointer?)
- *     2) Find the meta-data pointer
- */
 void kfree(void* ptr) 
 {
+	acquire_spinlock(&heap_lock);
+
 	if (!is_valid_ptr(ptr)) 
 	{
 		printf("\nInvalid ptr passed to 'free'\n");
@@ -255,4 +214,6 @@ void kfree(void* ptr)
 
     	heapPos = (void *)block;
   	}
+
+  	release_spinlock(&heap_lock);
 }
