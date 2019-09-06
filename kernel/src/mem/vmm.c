@@ -1,7 +1,8 @@
 #include <mem/vmm.h>
 #include <mem/pmm.h>
-#include <libk/stdlib.h>
+#include <libk/dbg.h>
 #include <libk/types.h>
+#include <libk/string.h>
 #include <task/spinlock.h>
 
 // Page table represents 4mb address space
@@ -109,7 +110,7 @@ void vmmngr_map_page (void* phys, void* virt)
          return;
 
       // Clear page table
-      kmemset (table, 0, sizeof(ptable));
+      memset (table, 0, sizeof(ptable));
 
       // Create a new entry
       pd_entry* entry =
@@ -154,7 +155,7 @@ void vmmngr_initialize ()
    }
 
    // Clear page table
-   kmemset (table, 0, sizeof (ptable));
+   memset (table, 0, sizeof (ptable));
 
    // 1st 4mb are idenitity mapped
    for (int i = 0, frame=0x0, virt=0x00000000; i < 1024; i++, frame += 4096, virt += 4096)
@@ -191,7 +192,7 @@ void vmmngr_initialize ()
    }
 
   // Clear directory table and set it as current
-  kmemset (dir, 0, sizeof (pdirectory));
+  memset (dir, 0, sizeof (pdirectory));
 
    // Get first entry in dir table and set it up to point to our table
    pd_entry* entry = &dir->m_entries [PAGE_DIRECTORY_INDEX (0xc0000000) ];

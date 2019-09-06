@@ -1,10 +1,7 @@
 #include <dev/initrd.h>
 #include <libk/string.h>
-#include <libk/stdlib.h>
+#include <libk/stdlib.h> // Why?
 #include <mem/heap.h>
-
-// DEBUG ONLY - REMOVE
-#include <libk/stdio.h>
 
 initrd_header_t *initrd_header;     // The header.
 initrd_file_header_t *file_headers; // The list of file headers.

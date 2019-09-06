@@ -26,7 +26,9 @@ SRCS=	\
 	src/fs/fs.o \
 	src/dev/initrd.o \
 	src/task/spinlock.o \
-	src/ds/bitmap.o
+	src/ds/bitmap.o \
+	src/dev/serial.o \
+	src/libk/dbg.o
 
 CFLAGS=-nostdlib -nostdinc -fno-builtin -fno-stack-protector -std=c11 -g -I ./inc -D DEBUG
 LDFLAGS=-T ./conf/link-kernel.ld
@@ -47,15 +49,15 @@ all: 	$(SRCS) link ramdisk
 
 clean:
 	@printf "\n[+] Cleaning...\n\n"
-	@-rm -rf src/arch/*.o src/mem/*.o src/kernel/*.o src/libk/*.o src/dev/*.o src/boot/*.o  bin/kernel bin/initrd.img
+	@-rm -rf src/arch/*.o src/mem/*.o src/kernel/*.o src/libk/*.o src/dev/*.o src/boot/*.o  bin/kernel bin/initrd.img bin/kernel.log
 
 run:
 	@printf "\n[+] Running...\n\n"
-	@-qemu-system-i386 -kernel ./bin/kernel -monitor stdio -name Kernel -initrd ./bin/initrd.img -m 512
+	@-qemu-system-i386 -kernel ./bin/kernel -monitor stdio -name Kernel -initrd ./bin/initrd.img -m 512 -serial file:bin/kernel.log
 
 debug:
 	@printf "\n[+] Running in debug mode...\n\n"
-	@-qemu-system-i386 -kernel ./bin/kernel -initrd ./bin/initrd.img -m 512 -s -S&
+	@-qemu-system-i386 -kernel ./bin/kernel -initrd ./bin/initrd.img -m 512 -s -S -serial file:bin/kernel.log &
 	@-sleep 1
 	@-gdb
 

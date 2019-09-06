@@ -1,8 +1,8 @@
 #include <mem/heap.h>
 #include <mem/pmm.h>
 #include <mem/vmm.h>
-#include <libk/stdio.h>
 #include <libk/stdbool.h>
+#include <libk/dbg.h>
 #include <task/spinlock.h>
 
 uint32_t* heapPos = (uint32_t*)HEAP_POS;
@@ -79,6 +79,19 @@ static blck_metadata_t* extend_heap(blck_metadata_t* last, size_t size)
 	}
 
 	block->is_free = false;
+
+	// If we can split the block, then split it.
+	if(blck_metadata_t_SIZE * 2 + size < PAGE_SIZE)
+	{
+		blck_metadata_t* split_block = (blck_metadata_t*) (block->blck_metadata_t_end + size);
+		split_block->size = PAGE_SIZE - (blck_metadata_t_SIZE * 2) - size;
+		split_block->next = NULL;
+		split_block->prev = block;
+		split_block->validation_ptr = split_block->blck_metadata_t_end;
+		split_block->is_free = true;
+		block->next = split_block;
+	}
+
 	return block;
 }
 
@@ -183,13 +196,12 @@ void kfree(void* ptr)
 {
 	acquire_spinlock(&heap_lock);
 
-	if (!is_valid_ptr(ptr)) 
-	{
-		printf("\nInvalid ptr passed to 'free'\n");
-		return;
-	}
+	ASSERT(is_valid_ptr(ptr));
 
 	blck_metadata_t* block = get_blck_metadata_t_from_ptr(ptr);
+	
+	ASSERT(!block->is_free);
+
 	block->is_free = true;
 
 	if (block->prev && block->prev->is_free) 

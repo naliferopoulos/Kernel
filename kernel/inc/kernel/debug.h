@@ -1,3 +1,6 @@
+#ifndef DEBUG_H
+#define DEBUG_H
+
 #define DEBUG_BIOS_MMAP
 #define DEBUG_VGA
 #define DEBUG_GDT
@@ -9,3 +12,6 @@
 #define DEBUG_PMM
 #define DEBUG_VMM
 #define DEBUG_RD
+#define DEBUG_SERIAL
+
+#endif

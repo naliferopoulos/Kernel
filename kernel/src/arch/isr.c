@@ -1,6 +1,6 @@
 #include <arch/isr.h>
 #include <arch/idt.h>
-#include <libk/stdlib.h>
+#include <libk/dbg.h>
 
 
 /* These are function prototypes for all of the exception
@@ -130,6 +130,5 @@ void fault_handler(struct regs* r)
         *  In this tutorial, we will simply halt the system using an
         *  infinite loop */
         kpanic(exception_messages[r->int_no], r);
-        for (;;);
     }
 }

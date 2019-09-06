@@ -1,5 +1,5 @@
-#include <libk/stdio.h>
 #include <dev/vga.h>
+#include <libk/stdio.h>
 #include <libk/ctype.h>
 #include <libk/limits.h>
 #include <libk/stdbool.h>
