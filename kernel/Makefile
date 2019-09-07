@@ -73,5 +73,10 @@ ramdisk:
 	@printf "\n[+] Generating Ramdisk...\n\n"
 	@-cd initrd && ../tools/rdgen ../bin/initrd.img * 
 
+.c.o:
+	@echo "[+] GCC $<"
+	@$(CC) $(CFLAGS) -o $@ -c $< 
+
 .s.o:
+	@echo "[+] AS $<" 
 	@$(AS) $(ASFLAGS) $<
