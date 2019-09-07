@@ -159,28 +159,32 @@ int dbgf(const char *restrict format, ...) {
   return written;
 }
 
-void kstrace(int depth)
+void kstrace(uint32_t dummy)
 {
     // Stack contains:
     //  Second function argument
     //  First function argument (depth)
     //  Return address in calling function
     //  EBP of calling function (pointed to by current EBP)
-    int * ebp = (int *)(&depth - 2);
+    
+    uint32_t frame = 0;    
+    int * ebp = (int *)(&dummy - 2);
 
     dbg("Stack trace:\n");
 
-    for(unsigned int frame = 0; frame < depth; ++frame)
+    while(1)
     {
-    unsigned int eip = ebp[1];
+        uint32_t eip = ebp[1];
         if(ebp == 0)
           break;
 
         // Unwind to previous stack frame
-        ebp = (unsigned int *)(ebp[0]);
-        unsigned int * arguments = &ebp[2];
+        ebp = (uint32_t *)(ebp[0]);
+        uint32_t * arguments = &ebp[2];
 
         dbg("\t<%x>\n", eip);
+
+        ++frame;
     }
 }
 
@@ -244,7 +248,9 @@ void kpanic(char* err, struct regs* r)
   monitor_write_center("Dedicated to G,");
   monitor_write_center("who helps me fix all the errors in my life.");
   */
-  
+ 
+  kstrace(0);
+
   dbg("Enjoy some ascii art found here:\n");
   dbg("https://www.asciiart.eu/electronics/robots\n");
   dbg("                                       |       \n");
