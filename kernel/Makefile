@@ -28,7 +28,8 @@ SRCS=	\
 	src/task/spinlock.o \
 	src/ds/bitmap.o \
 	src/dev/serial.o \
-	src/libk/dbg.o
+	src/libk/dbg.o \
+	src/ds/list.o
 
 CFLAGS=-nostdlib -nostdinc -fno-builtin -fno-stack-protector -std=c11 -I ./inc -D DEBUG -g 
 LDFLAGS=-T ./conf/link-kernel.ld -nostdlib -Map=bin/kernel.map
