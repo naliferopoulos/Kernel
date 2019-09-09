@@ -8,6 +8,41 @@
 #include <libk/stdio.h>
 #include <libk/string.h>
 #include <libk/stdlib.h>
+#include <kernel/elf.h>
+
+/*
+extern uint32_t sym_start;
+extern uint32_t sym_end;
+
+extern uint32_t str_start;
+extern uint32_t str_end;
+
+char * get_symbol(uint32_t addr)
+{
+    printf("SYMSTR: %x, SYMEND: %x, STRSTR: %x, STREND: %x\n", sym_start, sym_end, str_start, str_end);
+    
+    Elf32_Sym* symbol = (Elf32_Sym*) sym_start;
+
+    while(symbol < sym_end)
+    {
+	// Parse through all the symbols
+	uint32_t* symstart = symbol->addr;
+	uint32_t* symend = symbol->addr + symbol->size;
+
+	printf("%s\n", str_start + symbol->name);
+
+	if (symstart <= addr && addr <= symend)
+	{
+		// We found our symbol!
+		return (char *)((uint32_t*) str_start + symbol->name);
+	}
+
+	++symbol;
+    }
+
+    return 0;
+}
+*/
 
 void abort()
 {
