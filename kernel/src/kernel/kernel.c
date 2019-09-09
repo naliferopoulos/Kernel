@@ -224,7 +224,7 @@ int k_main(struct multiboot_info* mboot, uint32_t magic)
 	// To test double free.
 	void* ptr10 = kmalloc(20);
 	kfree(ptr10);
-	kfree(ptr10);
+	//kfree(ptr10);
 
 	#endif
 	
