@@ -30,8 +30,8 @@ SRCS=	\
 	src/dev/serial.o \
 	src/libk/dbg.o
 
-CFLAGS=-nostdlib -nostdinc -fno-builtin -fno-stack-protector -std=c11 -g -I ./inc -D DEBUG
-LDFLAGS=-T ./conf/link-kernel.ld
+CFLAGS=-nostdlib -nostdinc -fno-builtin -fno-stack-protector -std=c11 -I ./inc -D DEBUG -g 
+LDFLAGS=-T ./conf/link-kernel.ld -nostdlib -Map=bin/kernel.map
 ASFLAGS= -f elf
 
 LD=/opt/cross/bin/i386-elf-ld
@@ -49,7 +49,8 @@ all: 	$(SRCS) link ramdisk
 
 clean:
 	@printf "\n[+] Cleaning...\n\n"
-	@-rm -rf src/arch/*.o src/mem/*.o src/kernel/*.o src/libk/*.o src/dev/*.o src/boot/*.o  bin/kernel bin/initrd.img bin/kernel.log
+	@find . -name "*.o" -type f -delete
+	@-rm -rf bin/kernel bin/initrd.img bin/kernel.log bin/kernel.map
 
 run:
 	@printf "\n[+] Running...\n\n"
