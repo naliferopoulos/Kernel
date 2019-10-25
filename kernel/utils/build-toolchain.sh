@@ -10,7 +10,7 @@ BINUTILS_ARCHIVE="binutils-2.32.tar.gz"
 GCC="gcc-8.3.0"
 GCC_ARCHIVE="gcc-8.3.0.tar.gz"
 
-mkdir $PREFIX
+mkdir -p $PREFIX
 cd $PREFIX
 
 mkdir src
