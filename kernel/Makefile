@@ -35,9 +35,9 @@ CFLAGS=-nostdlib -nostdinc -fno-builtin -fno-stack-protector -std=c11 -I ./inc -
 LDFLAGS=-T ./conf/link-kernel.ld -nostdlib -Map=bin/kernel.map
 ASFLAGS= -f elf
 
-LD=/opt/cross/bin/i386-elf-ld
+LD=./toolchain/bin/i686-elf-ld
 AS=nasm
-CC=/opt/cross/bin/i386-elf-gcc
+CC=./toolchain/bin/i686-elf-gcc
 
 all: 	$(SRCS) link ramdisk
 	@printf "\n[+] Done!\n\n"
