@@ -67,13 +67,13 @@ link:
 	@printf "\n[+] Creating Kernel Image...\n\n"
 	@$(LD) $(LDFLAGS) -o ./bin/kernel $(SRCS)
 
-toolchain:
-	@printf "\n[+] Creating Toolchain...\n\n"
-	@-gcc tools/rdgen.c -o tools/rdgen
+utils:
+	@printf "\n[+] Creating Utilities...\n\n"
+	@-gcc utils/rdgen.c -o utils/rdgen
 
 ramdisk:
 	@printf "\n[+] Generating Ramdisk...\n\n"
-	@-cd initrd && ../tools/rdgen ../bin/initrd.img * 
+	@-cd initrd && ../utils/rdgen ../bin/initrd.img * 
 
 .c.o:
 	@echo "[+] GCC $<"
