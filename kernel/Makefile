@@ -71,6 +71,9 @@ utils:
 	@printf "\n[+] Creating Utilities...\n\n"
 	@-gcc utils/rdgen.c -o utils/rdgen
 
+toolchain:
+	@./utils/build-toolchain.sh
+
 ramdisk:
 	@printf "\n[+] Generating Ramdisk...\n\n"
 	@-cd initrd && ../utils/rdgen ../bin/initrd.img * 
