@@ -12,10 +12,12 @@ Kernel is only targetting x86 (i386+) computers and as of now it supports Multib
 ## Nice! How do I compile?
 Compiling and correctly linking the kernel requires setting up a cross-compiler and toolchain (GCC and Binutils) for your system. Kernel will **not** compile correctly under your platform specific toolchain **even** if you are running x86. You can try passing flags to GCC to get it to compile in freestanding mode without linking to your OS's libraries but you are on your own. Consider yourself warned!
 
-After you have set up your cross-toolchain edit the Makefile so that it points to your cross-binaries, type *make* and voila!
+In order to build a cross-compiler, run the script provided in the utils to set up a toolchain automatically, by typing *make toolchain*.
+
+After you have set up your cross-toolchain ~~edit the Makefile so that it points to your cross-binaries,~~ type *make* and voila!
 
 ## I have my binaries, now what?
-You can test it under QEMU, or you can set up a partition with GRUB (or even LILO, SystemCommander and so on) to boot it.
+You can test it under QEMU, or you can set up a partition with GRUB (or even LILO, SystemCommander and so on) to boot it. Type *make run*.
 
 ## It crashed! :(
 This will probably happen more often than not. Send me a screenshot of the panic screen and I might be able to fix it!
