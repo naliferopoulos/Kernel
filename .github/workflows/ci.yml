@@ -1,0 +1,19 @@
+name: Kernel CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build Toolchain
+      run: |
+        cd kernel
+        make toolchain
+    - name: Build Kernel
+      run: |
+        cd kernel
+        make
