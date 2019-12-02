@@ -5,10 +5,10 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 PREFIX="$DIR/../toolchain"
 SYSROOT="$DIR/../root"
 TARGET=i686-elf
-BINUTILS="binutils-2.32"
-BINUTILS_ARCHIVE="binutils-2.32.tar.gz"
-GCC="gcc-8.3.0"
-GCC_ARCHIVE="gcc-8.3.0.tar.gz"
+BINUTILS="binutils-2.33.1"
+BINUTILS_ARCHIVE="binutils-2.33.1.tar.gz"
+GCC="gcc-9.2.0"
+GCC_ARCHIVE="gcc-9.2.0.tar.gz"
 NASM="nasm-2.14.02"
 NASM_ARCHIVE="nasm-2.14.02.tar.gz"
 
@@ -34,19 +34,19 @@ pushd src
 	rm -rf $GCC
 	tar -xf $GCC_ARCHIVE
 
+	# NASM will be built on the fly, in the src directory, due to issues with autoreconf.
 	rm -rf $NASM
 	tar -xf $NASM_ARCHIVE
-
 popd
 
-mkdir -p build/gcc build/binutils build/nasm
+mkdir -p build/gcc build/binutils
 
 pushd build
 	pushd binutils
-		$PREFIX/src/$BINUTILS/configure --target="$TARGET" --prefix="$PREFIX" --with-sysroot="$SYSROOT" --disable-nls --disable-werror
-		make
+		$PREFIX/src/$BINUTILS/configure --target="$TARGET" --prefix="$PREFIX" --with-sysroot="$SYSROOT" --disable-nls --disable-werror --disable-multilib
+		make -k
 		make install
-		rm -f "$PREFIX/src/$BINUTILS_ARCHIVE"
+		#rm -f "$PREFIX/src/$BINUTILS_ARCHIVE"
 		rm -rf "$PREFIX/src/$BINUTILS"
 	popd
 
@@ -56,16 +56,18 @@ pushd build
 		make all-target-libgcc
 		make install-gcc
 		make install-target-libgcc
-		rm -f "$PREFIX/src/$GCC_ARCHIVE"
+		#rm -f "$PREFIX/src/$GCC_ARCHIVE"
 		rm -rf "$PREFIX/src/$GCC"
 	popd
+popd
 
-	pushd nasm
-		$PREFIX/src/$NASM/autogen.sh
+pushd src
+	pushd $NASM
+		sh $PREFIX/src/$NASM/autogen.sh
 		$PREFIX/src/$NASM/configure --prefix="$PREFIX"
 		make
 		make install
-		rm -f "$PREFIX/src/$NASM_ARCHIVE"
+		#rm -f "$PREFIX/src/$NASM_ARCHIVE"
 		rm -rf "$PREFIX/src/$NASM"
 	popd
 popd
