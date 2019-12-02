@@ -36,7 +36,7 @@ LDFLAGS=-T ./conf/link-kernel.ld -nostdlib -Map=bin/kernel.map
 ASFLAGS= -f elf
 
 LD=./toolchain/bin/i686-elf-ld
-AS=nasm
+AS=./toolchain/bin/nasm
 CC=./toolchain/bin/i686-elf-gcc
 
 all: 	$(SRCS) link ramdisk

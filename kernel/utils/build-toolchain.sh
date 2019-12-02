@@ -9,6 +9,8 @@ BINUTILS="binutils-2.32"
 BINUTILS_ARCHIVE="binutils-2.32.tar.gz"
 GCC="gcc-8.3.0"
 GCC_ARCHIVE="gcc-8.3.0.tar.gz"
+NASM="nasm-2.14.02"
+NASM_ARCHIVE="nasm-2.14.02.tar.gz"
 
 mkdir -p $PREFIX
 cd $PREFIX
@@ -22,6 +24,9 @@ pushd src
 	if [ ! -e $GCC_ARCHIVE ]; then
 		wget "https://ftp.gnu.org/gnu/gcc/$GCC/$GCC_ARCHIVE"
 	fi
+	if [ ! -e $NASM_ARCHIVE ]; then
+		wget "https://www.nasm.us/pub/nasm/releasebuilds/2.14.02/$NASM_ARCHIVE"
+	fi
 
 	rm -rf $BINUTILS
 	tar -xf $BINUTILS_ARCHIVE
@@ -29,9 +34,12 @@ pushd src
 	rm -rf $GCC
 	tar -xf $GCC_ARCHIVE
 
+	rm -rf $NASM
+	tar -xf $NASM_ARCHIVE
+
 popd
 
-mkdir -p build/gcc build/binutils
+mkdir -p build/gcc build/binutils build/nasm
 
 pushd build
 	pushd binutils
@@ -50,5 +58,14 @@ pushd build
 		make install-target-libgcc
 		rm -f "$PREFIX/src/$GCC_ARCHIVE"
 		rm -rf "$PREFIX/src/$GCC"
+	popd
+
+	pushd nasm
+		$PREFIX/src/$NASM/autogen.sh
+		$PREFIX/src/$NASM/configure --prefix="$PREFIX"
+		make
+		make install
+		rm -f "$PREFIX/src/$NASM_ARCHIVE"
+		rm -rf "$PREFIX/src/$NASM"
 	popd
 popd
