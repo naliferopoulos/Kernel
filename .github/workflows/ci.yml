@@ -12,7 +12,9 @@ jobs:
     - name: Build Toolchain
       run: |
         cd kernel
-        rm -rf toolchain/*
+        cd toolchain
+        rm -rf *
+        cd ..
         make toolchain
     - name: Build Kernel
       run: |
