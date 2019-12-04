@@ -1,4 +1,4 @@
-# Kernel
+# Kernel ![alt Kernel CI](https://github.com/naliferopoulos/Kernel/workflows/Kernel%20CI/badge.svg) 
 x86 Homebrew'd Microkernel
 
 ![alt Kernel Panic](https://github.com/naliferopoulos/Kernel/blob/master/kernel_panic.png/)
