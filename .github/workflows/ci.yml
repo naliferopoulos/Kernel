@@ -11,11 +11,11 @@ jobs:
     - uses: actions/checkout@v1
     - name: Install Prerequisites
       run: |
-        sudo apt-get install build-essential bison flex libgmp3-dev libmpc-dev libmpfr-dev texinfo automake autogen
+        sudo apt-get install build-essential bison flex libgmp3-dev libmpc-dev libmpfr-dev automake autogen
     - name: Build Toolchain
       run: |
         cd kernel
-        make -B toolchain
+        bash utils/build-toolchain.sh
     - name: Build Kernel
       run: |
         cd kernel
