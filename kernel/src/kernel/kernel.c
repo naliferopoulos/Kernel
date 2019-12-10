@@ -42,6 +42,7 @@ int k_main(struct multiboot_info* mboot, uint32_t magic)
 	monitor_set_fg_color(YELLOW);
 	monitor_write_center("");
 	monitor_write_center("Welcome to Kernel!");
+	monitor_write_center(GIT);
 	monitor_write_center("");
 	monitor_set_bg_color(BLACK);
 	monitor_set_fg_color(WHITE);
