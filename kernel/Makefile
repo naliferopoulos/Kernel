@@ -37,9 +37,9 @@ CFLAGS=-nostdlib -nostdinc -fno-builtin -fno-stack-protector -std=c11 -I ./inc -
 LDFLAGS=-T ./conf/link-kernel.ld -nostdlib -Map=bin/kernel.map
 ASFLAGS= -f elf
 
-LD=./toolchain/bin/i686-elf-ld
+LD=./toolchain/bin/i686-pc-kernel-ld
 AS=./toolchain/bin/nasm
-CC=./toolchain/bin/i686-elf-gcc
+CC=./toolchain/bin/i686-pc-kernel-gcc
 
 all: 	$(SRCS) link ramdisk
 	@printf "\n[+] Done building $(GIT_COMMIT_ID)!\n\n"
