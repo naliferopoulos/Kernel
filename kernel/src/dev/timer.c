@@ -35,6 +35,5 @@ void timer_wait(int ticks)
     eticks = timer_ticks + ticks;
     while(timer_ticks < eticks)
     {
-        __asm__ __volatile__ ("sti//hlt//cli");
     }
 }
