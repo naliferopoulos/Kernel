@@ -6,7 +6,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 PREFIX="$DIR/../toolchain"
 SYSROOT="$DIR/../root"
-TARGET=i686-elf
+TARGET=i686-pc-kernel
 
 export PATH="$PREFIX/bin:$PATH"
 
@@ -41,8 +41,12 @@ pushd src
 	rm -rf $BINUTILS
 	tar -xf $BINUTILS_ARCHIVE
 
+	patch -p0 < $DIR/binutils.patch
+
 	rm -rf $GCC
 	tar -xf $GCC_ARCHIVE
+
+	patch -p0 < $DIR/gcc.patch
 
 	# NASM will be built on the fly, in the src directory, due to issues with autoreconf.
 	rm -rf $NASM
