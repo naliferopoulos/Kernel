@@ -59,6 +59,9 @@ int k_main(struct multiboot_info* mboot, uint32_t magic)
 	monitor_set_fg_color(WHITE);
 	monitor_write_center("");
 
+	// Ensure modules where successfully loaded!
+	ASSERT(CHECK_MBOOT_FLAG(mboot->flags, MOD_FLAG));
+
 	multiboot_module_t *initrd = (multiboot_module_t*)(mboot->mods_addr);
 	uint32_t initrd_location = (initrd->mod_start);
 	uint32_t initrd_end = (initrd->mod_end);
@@ -103,6 +106,9 @@ int k_main(struct multiboot_info* mboot, uint32_t magic)
 	#ifdef DEBUG_KBD
 	dbg("[+] Keyboard driver active.\n");
 	#endif
+
+	// Ensure a memory map was passed!
+	ASSERT(CHECK_MBOOT_FLAG(mboot->flags, MMAP_FLAG));
 
 	#ifdef DEBUG_BIOS_MMAP
 	dbg("\tMemory Map Address: %x, Memory Map Length: %x\n", mboot->mmap_addr, mboot->mmap_length);

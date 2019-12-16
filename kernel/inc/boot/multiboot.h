@@ -22,6 +22,16 @@
 #ifndef MULTIBOOT_HEADER
 #define MULTIBOOT_HEADER 1
 
+#define MEM_FLAG 0
+#define BOOTDEV_FLAG 1
+#define CMD_FLAG 2
+#define MOD_FLAG 3
+#define AOUTSYM_FLAG 4
+#define ELFHDR_FLAG 5
+#define MMAP_FLAG 6
+
+#define CHECK_MBOOT_FLAG(flags,bit)   ((flags) & (1 << (bit)))
+
 /* How many bytes from the start of the file we search for the header.  */
 #define MULTIBOOT_SEARCH			8192
 #define MULTIBOOT_HEADER_ALIGN			4
