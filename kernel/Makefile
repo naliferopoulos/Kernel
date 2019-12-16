@@ -31,15 +31,23 @@ SRCS=	\
 	src/libk/dbg.o \
 	src/ds/list.o
 
-GIT_COMMIT_ID=$(shell git rev-parse --short HEAD)
-
-CFLAGS=-nostdlib -nostdinc -fno-builtin -fno-stack-protector -std=c11 -I ./inc -D DEBUG -D GIT='"$(GIT_COMMIT_ID)"' -g 
-LDFLAGS=-T ./conf/link-kernel.ld -nostdlib -Map=bin/kernel.map
-ASFLAGS= -f elf
-
 LD=./toolchain/bin/i686-pc-kernel-ld
 AS=./toolchain/bin/nasm
 CC=./toolchain/bin/i686-pc-kernel-gcc
+
+GIT_COMMIT_ID=$(shell git rev-parse --short HEAD)
+GCC_TARGET=$(shell $(CC) -dumpmachine) 
+GCC_VERSION=$(shell $(CC) -dumpfullversion)
+
+DEFINITIONS= \
+	     -D DEBUG \
+	     -D GIT='"$(GIT_COMMIT_ID)"' \
+	     -D GCC_TARGET='"$(GCC_TARGET)"' \
+	     -D GCC_VERSION='"$(GCC_VERSION)"'
+
+CFLAGS=-nostdlib -nostdinc -fno-builtin -fno-stack-protector -std=c11 -I ./inc $(DEFINITIONS) -g 
+LDFLAGS=-T ./conf/link-kernel.ld -nostdlib -Map=bin/kernel.map
+ASFLAGS= -f elf
 
 all: 	$(SRCS) link ramdisk
 	@printf "\n[+] Done building $(GIT_COMMIT_ID)!\n\n"
