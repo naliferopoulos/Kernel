@@ -41,11 +41,19 @@ int k_main(struct multiboot_info* mboot, uint32_t magic)
 	monitor_set_bg_color(RED);
 	monitor_set_fg_color(YELLOW);
 	monitor_write_center("");
+
 	monitor_write_center("Welcome to Kernel!");
 	monitor_write_center("");
+	
 	monitor_write_center("Git Commit ID: " GIT);
 	monitor_write_center("GCC Version: " GCC_VERSION);
 	monitor_write_center("GCC Platform: " GCC_TARGET);
+	
+	if(mboot->boot_loader_name != 0)
+		monitor_write_center((char *)mboot->boot_loader_name);
+	else
+		monitor_write_center("Unknown Bootloader!");
+	
 	monitor_write_center("");
 	monitor_set_bg_color(BLACK);
 	monitor_set_fg_color(WHITE);
