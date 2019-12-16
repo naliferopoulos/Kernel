@@ -27,8 +27,6 @@ int k_main(struct multiboot_info* mboot, uint32_t magic)
 	// Before proceeding any further, make sure we were booted by a multiboot compliant bootloader!
 	ASSERT(magic == MULTIBOOT_BOOTLOADER_MAGIC);
 
-	// Before proceeding any further, make sure we were passed an initial ram disk!
-	ASSERT(mboot->mods_count > 0);
 	
 	setup_serial();
 	#ifdef DEBUG_SERIAL
@@ -61,6 +59,9 @@ int k_main(struct multiboot_info* mboot, uint32_t magic)
 
 	// Ensure modules where successfully loaded!
 	ASSERT(CHECK_MBOOT_FLAG(mboot->flags, MOD_FLAG));
+
+	// Before proceeding any further, make sure we were passed an initial ram disk!
+	ASSERT(mboot->mods_count > 0);
 
 	multiboot_module_t *initrd = (multiboot_module_t*)(mboot->mods_addr);
 	uint32_t initrd_location = (initrd->mod_start);
