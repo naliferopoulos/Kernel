@@ -45,11 +45,12 @@ DEFINITIONS= \
 	     -D GCC_TARGET='"$(GCC_TARGET)"' \
 	     -D GCC_VERSION='"$(GCC_VERSION)"'
 
-CFLAGS=-nostdlib -nostdinc -fno-builtin -fno-stack-protector -std=c11 -I ./inc $(DEFINITIONS) -g 
+CFLAGS=-nostdlib -nostdinc -fno-builtin -fno-stack-protector -std=c11 -I ./inc $(DEFINITIONS) #-g 
 LDFLAGS=-T ./conf/link-kernel.ld -nostdlib -Map=bin/kernel.map
 ASFLAGS= -f elf
+ASSYMFLAGS= -f bin
 
-all: 	$(SRCS) link ramdisk
+all: 	$(SRCS) link ramdisk symbols
 	@printf "\n[+] Done building $(GIT_COMMIT_ID)!\n\n"
 	@printf "\n\tWelcome to Kernel!\t\n\n"
 	@printf "This is your first step towards insanity.\n"
@@ -63,9 +64,15 @@ clean:
 	@find . -name "*.o" -type f -delete
 	@-rm -rf bin/kernel bin/initrd.img bin/kernel.log bin/kernel.map
 
+symbols:
+	@printf "\n[+] Generating symbols...\n\n"
+	@cat bin/kernel.map | grep "                " | grep -v src | grep -v "relaxing" | grep -v "ALIGN" | sed 's/                / /g' | grep -v "\." | awk '{$$1=$$1;print}' > bin/kernel.sym
+	@python3 utils/gen_symbols.py
+	@$(AS) $(ASSYMFLAGS) ./bin/symfile -o ./bin/symbols.img
+
 run:
 	@printf "\n[+] Running...\n\n"
-	@-qemu-system-i386 -kernel ./bin/kernel -monitor stdio -name Kernel -initrd ./bin/initrd.img -m 512 -serial file:bin/kernel.log
+	@-qemu-system-i386 -kernel ./bin/kernel -monitor stdio -name Kernel -initrd "./bin/initrd.img,./bin/symbols.img" -m 32 -serial file:bin/kernel.log
 
 debug:
 	@printf "\n[+] Running in debug mode...\n\n"
