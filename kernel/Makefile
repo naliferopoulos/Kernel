@@ -62,13 +62,13 @@ all: 	$(SRCS) link ramdisk symbols
 clean:
 	@printf "\n[+] Cleaning...\n\n"
 	@find . -name "*.o" -type f -delete
-	@-rm -rf bin/kernel bin/initrd.img bin/kernel.log bin/kernel.map
+	@-rm -rf bin/kernel bin/initrd.img bin/kernel.log bin/kernel.map bin/kernel.sym bin/symfile.s bin/symbols.img
 
 symbols:
 	@printf "\n[+] Generating symbols...\n\n"
 	@cat bin/kernel.map | grep "                " | grep -v src | grep -v "relaxing" | grep -v "ALIGN" | sed 's/                / /g' | grep -v "\." | awk '{$$1=$$1;print}' > bin/kernel.sym
 	@python3 utils/gen_symbols.py
-	@$(AS) $(ASSYMFLAGS) ./bin/symfile -o ./bin/symbols.img
+	@$(AS) $(ASSYMFLAGS) ./bin/symfile.s -o ./bin/symbols.img
 
 run:
 	@printf "\n[+] Running...\n\n"

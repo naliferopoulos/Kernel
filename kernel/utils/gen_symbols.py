@@ -2,7 +2,7 @@
 symfile = ""
 
 # Open the output file
-o = open('bin/symfile','w') 
+o = open('bin/symfile.s','w') 
 
 # Open the symbol file
 with open('bin/kernel.sym','r') as f:
