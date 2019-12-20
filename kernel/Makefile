@@ -67,7 +67,7 @@ clean:
 symbols:
 	@printf "\n[+] Generating symbols...\n\n"
 	@cat bin/kernel.map | grep "                " | grep -v src | grep -v "relaxing" | grep -v "ALIGN" | sed 's/                / /g' | grep -v "\." | awk '{$$1=$$1;print}' > bin/kernel.sym
-	@python3 utils/gen_symbols.py
+	@./utils/symgen
 	@$(AS) $(ASSYMFLAGS) ./bin/symfile.s -o ./bin/symbols.img
 
 run:
@@ -87,6 +87,7 @@ link:
 utils:
 	@printf "\n[+] Creating Utilities...\n\n"
 	@-gcc utils/rdgen.c -o utils/rdgen
+	@-gcc utils/symgen.c -o utils/symgen
 
 ramdisk:
 	@printf "\n[+] Generating Ramdisk...\n\n"
