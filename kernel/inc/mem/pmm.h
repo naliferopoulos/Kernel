@@ -9,6 +9,8 @@
 // Physical address
 typedef	uint32_t physical_addr;
 
+uint32_t align_to_upper(uint32_t a);
+
 // Initialize the physical memory manager
 void pmm_init (size_t, physical_addr);
 
@@ -33,17 +35,8 @@ void pmm_free_blocks (void*, size_t);
 // Returns amount of physical memory the manager is set to use
 size_t pmm_get_memory_size ();
 
-// Returns number of blocks currently in use
-uint32_t pmm_get_use_block_count ();
-
-// Returns number of blocks not in use
-uint32_t pmm_get_free_block_count ();
-
-// Returns number of memory blocks
-uint32_t pmm_get_block_count ();
-
-// Returns default memory block size in bytes
-uint32_t pmm_get_block_size ();
+// Finalizes the memory regions.
+void pmm_finalize();
 
 // Enable or disable paging
 void pmm_paging_enable (int enabled);
