@@ -2,6 +2,7 @@
 #include <libk/string.h>
 #include <libk/stdlib.h> // Why?
 #include <mem/heap.h>
+#include <libk/dbg.h>
 
 initrd_header_t *initrd_header;     // The header.
 initrd_file_header_t *file_headers; // The list of file headers.
@@ -23,7 +24,7 @@ static uint32_t initrd_read(fs_node_t *node, uint32_t offset, uint32_t size, uin
 }
 
 static struct dirent *initrd_readdir(fs_node_t *node, uint32_t index)
-{    
+{ 
     if (index >= nroot_nodes)
         return 0;
 
@@ -49,6 +50,8 @@ fs_node_t *initialise_initrd(uint32_t location)
 
     // Initialise the root directory.
     initrd_root = (fs_node_t*)kmalloc(sizeof(fs_node_t));
+    ASSERT(initrd_root != 0);
+    
     strcpy(initrd_root->name, "initrd");
     initrd_root->mask = initrd_root->uid = initrd_root->gid = initrd_root->inode = initrd_root->length = 0;
     initrd_root->flags = FS_DIRECTORY;
@@ -62,6 +65,8 @@ fs_node_t *initialise_initrd(uint32_t location)
     initrd_root->impl = 0;
 
     root_nodes = (fs_node_t*)kmalloc(sizeof(fs_node_t) * initrd_header->nfiles);
+    ASSERT(root_nodes != 0);
+    
     nroot_nodes = initrd_header->nfiles;
 
     // For every file...
