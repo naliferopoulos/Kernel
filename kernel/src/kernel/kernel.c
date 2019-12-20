@@ -20,7 +20,8 @@
 #include <kernel/debug.h>
 #endif
 
-extern int end;
+extern uint32_t end;
+//extern fs_node_t* fs_root;
 
 int k_main(struct multiboot_info* mboot, uint32_t magic)
 {
@@ -59,18 +60,34 @@ int k_main(struct multiboot_info* mboot, uint32_t magic)
 	// Ensure modules where successfully loaded!
 	ASSERT(CHECK_MBOOT_FLAG(mboot->flags, MOD_FLAG));
 
-	// Before proceeding any further, make sure we were passed an initial ram disk!
-	ASSERT(mboot->mods_count > 0);
+	// Before proceeding any further, make sure we were passed an initial ram disk and a symbol map!
+	ASSERT(mboot->mods_count == 2);
 
-	multiboot_module_t *initrd = (multiboot_module_t*)(mboot->mods_addr);
-	uint32_t initrd_location = (initrd->mod_start);
-	uint32_t initrd_end = (initrd->mod_end);
+	multiboot_module_t *mod = (multiboot_module_t*)(mboot->mods_addr);
+	uint32_t initrd_location = (uint32_t)(mod->mod_start);
+	uint32_t initrd_end = (uint32_t)(mod->mod_end);
 
-	#ifdef DEBUG_RD
-	dbg("[+] Ramdisk\n");
+	// Fetch the next module.
+	mod++;
+
+	uint32_t symmap_location = (uint32_t)(mod->mod_start);
+	uint32_t symmap_end = (uint32_t)(mod->mod_end);
+
+	set_symbol_map(symmap_location);
+
+	#ifdef DEBUG_MODULES
 	dbg("\tMultiboot Module Count: %d\n", mboot->mods_count);
 	dbg("\tMultiboot Module Address: %x\n", mboot->mods_addr);
+	#endif
+	
+	#ifdef DEBUG_RD
+	dbg("[+] Ramdisk\n");
 	dbg("\tRamdisk Location: %x --> %x\n", initrd_location, initrd_end);
+	#endif
+
+	#ifdef DEBUG_SYMBOLS
+	dbg("[+] Symbol Map\n");
+	dbg("\tSymmap Location: %x --> %x\n", symmap_location, symmap_end);
 	#endif
 
 	#ifdef DEBUG_VGA
@@ -114,8 +131,8 @@ int k_main(struct multiboot_info* mboot, uint32_t magic)
 	dbg("\tMemory Map Address: %x, Memory Map Length: %x\n", mboot->mmap_addr, mboot->mmap_length);
 	#endif
 
+	// Parse the memory map to identify the sum of every memory area pool size.
 	uint32_t memSize = 0;
-
 	multiboot_memory_map_t* mmap = (multiboot_memory_map_t*)mboot->mmap_addr;
 	while(mmap < (multiboot_memory_map_t*)(mboot->mmap_addr + mboot->mmap_length))
 	{
@@ -131,7 +148,8 @@ int k_main(struct multiboot_info* mboot, uint32_t magic)
 
 	// Initialize the physical memory manager with the total memory size, and the first free memory block used as a bitmap.
 	//pmm_init (memSize, (int)(&end + 1));
-	pmm_init (memSize, (int)(initrd_end + 1));
+	//pmm_init (memSize, (int)(initrd_end + 1));
+	pmm_init(memSize, (size_t)(align_to_upper(symmap_end)));
 
 	mmap = (multiboot_memory_map_t*)mboot->mmap_addr;
 	while(mmap < (multiboot_memory_map_t*)(mboot->mmap_addr + mboot->mmap_length))
@@ -142,30 +160,21 @@ int k_main(struct multiboot_info* mboot, uint32_t magic)
 
 		if(mmap->type == 1)
 		{
-			pmm_init_region (mmap->addr_low, mmap->len_low);
+			// Only start allocations above 0. Makes things easier to debug. (It skips over the usual sub-1MB RAM pool. 
+			if(mmap->addr_low > 0)
+				pmm_init_region (mmap->addr_low, mmap->len_low);
 		}
 
 		mmap = (multiboot_memory_map_t*) ((unsigned int)mmap + mmap->size + sizeof(mmap->size));
 	}
 
-	// Mark kernel as used!
-	pmm_deinit_region (0x100000, (int)(&end - 0x100000));
+	// Mark kernel and modules as used!
+	pmm_deinit_region (0x100000, align_to_upper(symmap_end) - 0x100000);
 
-	// Mark ram disk as used!
-	pmm_deinit_region (initrd_location, (size_t)(initrd_end - initrd_location));
-
-	uint32_t total_blocks = pmm_get_block_count();
-	uint32_t used_blocks = pmm_get_use_block_count();
-	uint32_t free_blocks = pmm_get_free_block_count();
-
-	// Sanity Check
-	ASSERT(total_blocks == (used_blocks + free_blocks));
+	// Finalize the memory map.
+	pmm_finalize();
 
 	#ifdef DEBUG_PMM
-	dbg("\tTotal memory blocks: %x\n", total_blocks);
-	dbg("\tUsed memory blocks: %x\n", used_blocks);
-	dbg("\tFree memory blocks: %x\n", free_blocks);
-
 	dbg("[+] Physical memory manager active.\n");
 	#endif
 
@@ -174,7 +183,19 @@ int k_main(struct multiboot_info* mboot, uint32_t magic)
 	dbg("[+] Virtual memory manager active.\n");
 	#endif
 
+	// Pause. We NEED to identity map all kernel modules. 
+	// Remember, their starting address is always page aligned, their ending address is not.
 	
+	// Start with the ramdisk.
+	//uint32_t initrd_end_aligned = align_to_upper(initrd_end); 
+	//for(int i = initrd_location; i < initrd_end_aligned; i+=4096)
+	//	vmmngr_map_page(i, i);
+
+	// Then identity map the symbol map.
+	//uint32_t symmap_end_aligned = align_to_upper(symmap_end);
+	//for(int i = symmap_location; i < symmap_end_aligned; i+=4096)
+	//	vmmngr_map_page(i, i);
+		
 	// From now on, the heap can be used!
 	#ifdef DEBUG_VMM
 	dbg("Attempting allocations to test the kernel heap...\n");
@@ -235,80 +256,54 @@ int k_main(struct multiboot_info* mboot, uint32_t magic)
 	dbg("Freeing ptr8.\n");
 	kfree(ptr8);
 
-	dbg("Allocating ptr9 with 0xFFFF0000 bytes.\n");
-	void* ptr9 = kmalloc(0xFFFF0000);
-	dbg("\tptr9: %x\n", ptr9);
+	//dbg("Allocating ptr9 with 0xFFFF0000 bytes.\n");
+	//void* ptr9 = kmalloc(0xFFFF0000);
+	//dbg("\tptr9: %x\n", ptr9);
 
 	// To test double free.
-	void* ptr10 = kmalloc(20);
-	kfree(ptr10);
+	//void* ptr10 = kmalloc(20);
+	//kfree(ptr10);
 	//kfree(ptr10);
 
 	#endif
-	
 
+	// Initialize the root file system to be the ramdisk.
 	fs_root = initialise_initrd(initrd_location);
+
+	ASSERT(fs_root != 0);
 
 	#ifdef DEBUG_RD
 	dbg("[+] Ramdisk driver active.\n");
-	dbg("\t Dumping ramdisk contents...\n");
-	
-    int fs_entry = 0;
-    struct dirent *node = 0;
-    while ( (node = readdir_fs(fs_root, fs_entry)) != 0)
-    {
-        dbg("\tFound entry %s\n", node->name);
-        
-        fs_node_t *fsnode = finddir_fs(fs_root, node->name);
+	dbg("\tDumping ramdisk contents...\n");
 
-        if ((fsnode->flags&0x7) == FS_DIRECTORY)
-        {
-            dbg("\t(Directory)\n");
-        }
-        else
-        {
-            char buf[256];
-            uint32_t sz = read_fs(fsnode, 0, 256, buf);
-        	
-        	dbg("\t(File) %s\n", buf);
-        }
-        
-        fs_entry++;
-    }
-    #endif
-
-	// For testing virtual memory.
-	/*
-	mmap = (multiboot_memory_map_t*)(mboot + 0xC0000000)->mmap_addr;
-	while(mmap < (multiboot_memory_map_t*)(mboot->mmap_addr + mboot->mmap_length))
+	int fs_entry = 0;
+	struct dirent *node = 0;
+	while ( (node = readdir_fs(fs_root, fs_entry)) != 0)
 	{
-		#ifdef DEBUG_BIOS_MMAP
-		printf("\tMem -> Start: %x, Len: %x, Type: %x\n", mmap->addr_low, mmap->len_low, mmap->type);
-		#endif
+		dbg("\tFound entry %s\n", node->name);
+        
+		fs_node_t *fsnode = finddir_fs(fs_root, node->name);
 
-		if(mmap->type == 1)
+		if ((fsnode->flags&0x7) == FS_DIRECTORY)
 		{
-			pmm_init_region (mmap->addr_low, mmap->len_low);
+			dbg("\t(Directory)\n");
+		}
+		else
+		{
+			char* buf = kmalloc(fsnode->length + 1);
+			uint32_t sz = read_fs(fsnode, 0, fsnode->length, buf);
+			buf[fsnode->length] = '\0';
+			ASSERT(sz == fsnode->length);
+			dbg("\t(File[Size: %d]) %s\n",sz, buf);
+			kfree(buf);
 		}
 
-		mmap = (multiboot_memory_map_t*) ((unsigned int)mmap + mmap->size + sizeof(mmap->size));
+		fs_entry++;
 	}
-	*/
+	#endif
 
-	// For testing assertions.
-	//ASSERT("That's it for now!" == 0);
-
-	// For testing stack traces.
-	//kstrace(10);
-
-	// For testing page faults.
-	//int* p = 0xB0000000;
-	//*p = 6;
-
-	// For testing exceptions.
-	//__asm__ __volatile__("int $6");
-	//timer_wait(1000);
-	//int zero = 0xFFFFFFFF/0;
+	// Halt early.
+	ASSERT("End of features, for now!" == 0);
 
 	while(1) {
 	}

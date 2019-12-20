@@ -10,6 +10,35 @@
 #include <libk/stdlib.h>
 #include <kernel/elf.h>
 
+uint32_t sym_start = 0;
+
+void set_symbol_map(uint32_t addr)
+{
+	sym_start = addr;
+}
+
+char * get_symbol(uint32_t addr, uint32_t* sym_addr)
+{
+	ASSERT(sym_start != 0);
+
+	symbol_t* symbol = (symbol_t *)sym_start;
+	symbol_t* next = symbol+1;
+
+	while(next->address != 0)
+	{
+		if(symbol->address <= addr && addr < next->address)
+		{
+			if(sym_addr != 0)
+				*sym_addr = symbol->address;
+			return sym_start + symbol->name;
+		}
+		symbol++;
+		next++;
+	}
+
+	return 0;
+}
+
 /*
 extern uint32_t sym_start;
 extern uint32_t sym_end;
@@ -217,7 +246,18 @@ void kstrace(uint32_t dummy)
         ebp = (uint32_t *)(ebp[0]);
         uint32_t * arguments = &ebp[2];
 
-        dbg("\t<%x>\n", eip);
+	uint32_t addr = 0;
+	char* name = get_symbol(eip, &addr);
+	
+	if(name == 0)
+	{
+        	dbg("\t<??> (%x)\n", eip);
+	}
+	else
+	{
+		int offset = eip - addr;
+		dbg("\t<%s+%d> (%x)\n", name, offset, eip);
+	}
 
         ++frame;
     }
@@ -238,6 +278,8 @@ void kpanic(char* err, struct regs* r)
   dbg("===============================\n");
 
   dbg("\n\n");
+
+  dbgf("Fault: %s\n\n", err);
 
   if(r != 0)
   {
