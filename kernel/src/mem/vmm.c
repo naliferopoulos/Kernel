@@ -71,7 +71,7 @@ int vmmngr_alloc_page (pt_entry* e)
 	// Map it to the page
 	pt_entry_set_frame (e, (physical_addr)p);
 	pt_entry_add_attrib (e, I86_PTE_PRESENT);
-   pt_entry_add_attrib (e, I86_PTE_WRITABLE);
+	pt_entry_add_attrib (e, I86_PTE_WRITABLE);
 	// does set WRITE flag!
 
    release_spinlock(&vmm_lock);
@@ -96,6 +96,8 @@ void vmmngr_free_page (pt_entry* e)
 void vmmngr_map_page (void* phys, void* virt)
 {
    acquire_spinlock(&vmm_lock);
+
+   dbg("[VMM] Mapping %x -> %x\n", phys, virt);
 
    // Get page directory
    pdirectory* pageDirectory = vmmngr_get_directory ();
@@ -160,6 +162,7 @@ void vmmngr_initialize ()
    // 1st 4mb are idenitity mapped
    for (int i = 0, frame=0x0, virt=0x00000000; i < 1024; i++, frame += 4096, virt += 4096)
    {
+	dbg("[VMM] Mapping %x -> %x\n", frame, virt);
       // Create a new page
       pt_entry page = 0;
       pt_entry_add_attrib (&page, I86_PTE_PRESENT);
@@ -173,6 +176,7 @@ void vmmngr_initialize ()
    // Map 1mb to 3gb (where we are at)
    for (int i = 0, frame=0x100000, virt=0xc0000000; i < 1024; i++, frame += 4096, virt += 4096)
    {
+	dbg("[VMM] Mapping %x -> %x\n", frame, virt);
       // Create a new page
       pt_entry page = 0;
       pt_entry_add_attrib (&page, I86_PTE_PRESENT);
