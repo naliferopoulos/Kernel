@@ -13,5 +13,7 @@
 #define DEBUG_VMM
 #define DEBUG_RD
 #define DEBUG_SERIAL
+#define DEBUG_MODULES
+#define DEBUG_SYMBOLS
 
 #endif
