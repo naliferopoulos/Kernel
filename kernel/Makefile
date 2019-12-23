@@ -50,7 +50,7 @@ LDFLAGS=-T ./conf/link-kernel.ld -nostdlib -Map=bin/kernel.map
 ASFLAGS= -f elf
 ASSYMFLAGS= -f bin
 
-all: 	$(SRCS) link ramdisk symbols
+all: utils $(SRCS) link ramdisk symbols
 	@printf "\n[+] Done building $(GIT_COMMIT_ID)!\n\n"
 	@printf "\n\tWelcome to Kernel!\t\n\n"
 	@printf "This is your first step towards insanity.\n"
@@ -62,7 +62,7 @@ all: 	$(SRCS) link ramdisk symbols
 clean:
 	@printf "\n[+] Cleaning...\n\n"
 	@find . -name "*.o" -type f -delete
-	@-rm -rf bin/kernel bin/initrd.img bin/kernel.log bin/kernel.map bin/kernel.sym bin/symfile.s bin/symbols.img
+	@-rm -rf bin/kernel bin/initrd.img bin/kernel.log bin/kernel.map bin/kernel.sym bin/symfile.s bin/symbols.img utils/rdgen utils/symgen
 
 symbols:
 	@printf "\n[+] Generating symbols...\n\n"
@@ -84,6 +84,7 @@ link:
 	@printf "\n[+] Creating Kernel Image...\n\n"
 	@$(LD) $(LDFLAGS) -o ./bin/kernel $(SRCS)
 
+.PHONY: utils
 utils:
 	@printf "\n[+] Creating Utilities...\n\n"
 	@-gcc utils/rdgen.c -o utils/rdgen
