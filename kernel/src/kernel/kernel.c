@@ -15,6 +15,9 @@
 #include <dev/initrd.h>
 #include <dev/serial.h>
 #include <libk/dbg.h>
+#include <dev/cpuid.h>
+#include <dev/cmos.h>
+#include <task/process.h>
 
 #ifdef DEBUG
 #include <kernel/debug.h>
@@ -36,6 +39,8 @@ int k_main(struct multiboot_info* mboot, uint32_t magic)
 
 	dbg("[+] Kernel early log device initialized!\n");
 
+	dbg("[+] Processor: %s\n", cpuid_name());
+
 	monitor_clear();
 	monitor_set_bg_color(RED);
 	monitor_set_fg_color(YELLOW);
@@ -46,7 +51,9 @@ int k_main(struct multiboot_info* mboot, uint32_t magic)
 	
 	monitor_write_center("Git Commit ID: " GIT);
 	monitor_write_center("GCC Version: " GCC_VERSION " " GCC_TARGET);
-	
+
+	monitor_write_center(cpuid_name());
+
 	if(mboot->boot_loader_name != 0)
 		monitor_write_center((char *)mboot->boot_loader_name);
 	else
@@ -302,11 +309,22 @@ int k_main(struct multiboot_info* mboot, uint32_t magic)
 	}
 	#endif
 
-	// Halt early.
-	ASSERT("End of features, for now!" == 0);
+	// Read the CMOS.
+	struct cmos_rtc* time_data = kmalloc(sizeof(struct cmos_rtc));
 
+	cmos_get_time(time_data);
+
+	dbg("[%d/%d/%d, %d:%d:%d] Finished setup!\n", (int)time_data->day, (int)time_data->month, (int)time_data->year, (int)time_data->hour, (int)time_data->minute, (int)time_data->second);
+
+	// Initialize the Scheduler.
+	initialize_scheduler();
+
+	// Loop this eternally. We are never coming back.
 	while(1) {
 	}
+
+	// Halt early.
+	// ASSERT("End of features, for now!" == 0);
 
 	return 0xDEADBEEF;
 }

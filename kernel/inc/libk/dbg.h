@@ -21,5 +21,6 @@ void kpanicAssert(char *file, int line, char *desc);
 void kpanic(char* err, struct regs* r);
 void abort();
 void set_symbol_map(uint32_t addr);
+char* get_symbol(uint32_t addr, uint32_t* sym_addr);
 
 #endif

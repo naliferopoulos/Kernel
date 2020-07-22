@@ -29,7 +29,11 @@ SRCS=	\
 	src/ds/bitmap.o \
 	src/dev/serial.o \
 	src/libk/dbg.o \
-	src/ds/list.o
+	src/ds/list.o \
+	src/dev/cmos.o \
+	src/dev/cpuid.o \
+	src/task/process.o \
+	src/task/switch.o
 
 LD=./toolchain/bin/i686-pc-kernel-ld
 AS=./toolchain/bin/nasm
@@ -72,11 +76,11 @@ symbols:
 
 run:
 	@printf "\n[+] Running...\n\n"
-	@-qemu-system-i386 -kernel ./bin/kernel -monitor stdio -name Kernel -initrd "./bin/initrd.img,./bin/symbols.img" -m 32 -serial file:bin/kernel.log
+	@-qemu-system-i386 -kernel ./bin/kernel -monitor stdio -name Kernel -initrd "./bin/initrd.img,./bin/symbols.img" -m 32 -serial file:bin/kernel.log -no-reboot -d int,cpu_reset,guest_errors,mmu
 
 debug:
 	@printf "\n[+] Running in debug mode...\n\n"
-	@-qemu-system-i386 -kernel ./bin/kernel -initrd ./bin/initrd.img -m 512 -s -S -serial file:bin/kernel.log &
+	@-qemu-system-i386 -kernel ./bin/kernel -initrd "./bin/initrd.img,./bin/symbols.img" -m 32 -s -S -serial file:bin/kernel.log -no-reboot -d int,cpu_reset,guest_errors,mmu &
 	@-sleep 1
 	@-gdb
 

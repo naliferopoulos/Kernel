@@ -10,7 +10,7 @@
 #define DEBUG_PIC
 #define DEBUG_KBD
 #define DEBUG_PMM
-#define DEBUG_VMM
+//#define DEBUG_VMM
 #define DEBUG_RD
 #define DEBUG_SERIAL
 #define DEBUG_MODULES

@@ -1,6 +1,7 @@
 #include <dev/timer.h>
 #include <arch/irq.h>
 #include <arch/common.h>
+#include <task/process.h>
 
 volatile unsigned int timer_ticks = 0;
 
@@ -16,6 +17,8 @@ void timer_handler(struct regs *r)
 {
     /* Increment our 'tick count' */
     timer_ticks++;
+
+    	context_switch(r);
 }
 
 /* Sets up the system clock by installing the timer handler
@@ -23,7 +26,7 @@ void timer_handler(struct regs *r)
 void timer_install()
 {
 	/* Sets timer phase to 100Hz */
-	set_timer_phase(100);
+	set_timer_phase(1000);
     /* Installs 'timer_handler' to IRQ0 */
     irq_install_handler(0, timer_handler);
 }

@@ -20,6 +20,9 @@ pdirectory* _cur_directory = 0;
 // Current page directory base register
 physical_addr _cur_pdbr = 0;
 
+// Kernel page directory base register
+physical_addr kernel_pdbr = 0;
+
 // Virtual allocator spinlock
 spinlock_t vmm_lock = {.lock = 0};
 
@@ -211,6 +214,9 @@ void vmmngr_initialize ()
 
    // Store current PDBR
    _cur_pdbr = (physical_addr) &dir->m_entries;
+
+   // Also set the kernel PDBR
+   kernel_pdbr = _cur_pdbr;
 
    // Switch to our page directory
    vmmngr_switch_pdirectory (dir);
