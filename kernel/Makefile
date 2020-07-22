@@ -32,8 +32,7 @@ SRCS=	\
 	src/ds/list.o \
 	src/dev/cmos.o \
 	src/dev/cpuid.o \
-	src/task/process.o \
-	src/task/switch.o
+	src/task/process.o 
 
 LD=./toolchain/bin/i686-pc-kernel-ld
 AS=./toolchain/bin/nasm
